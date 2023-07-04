@@ -22,34 +22,44 @@ public class Grid : MonoBehaviour
 	private void Start()
 	{
 		cells = new Cell[gridSize, gridSize];
+		ResetGame();
+	}
+
+	public void ResetGame()
+	{
 		WorldGen();
 		PlayerSpawn();
 	}
-
 	public void WorldGen()
 	{
-		//instantiate cells
+		WorldCellsInGridInstantiate();
+		WorldCellsPathingCreation();
+	}
+
+	public void WorldCellsInGridInstantiate()
+	{
+		//clear 
+		foreach (Transform child in transform)
+		{
+			GameObject.Destroy(child.gameObject);
+		}
+
 		for (int row = 0; row < gridSize; row++)
 		{
 			for (int column = 0; column < gridSize; column++)
 			{
 				Cell tempCell = Instantiate(cellPrefab, transform.position + new Vector3(row - gridSize / 2, column - gridSize / 2, 0f) * cellSize, Quaternion.identity, transform);
 				tempCell.SetGridPosition(row, column);
-				//tempCell.SetPaths(true, true, true, true);
-				//tempCell.RandomizePaths();
 				cells[row, column] = tempCell;
 			}
 		}
-
-		RunWorldGeneration();
 	}
+
 
 	public void PlayerSpawn()
 	{
 		player.transform.position = transform.position + Vector3.forward * -1;
 		GetPlayerCellRelative(Vector3.zero).HideFogOfWar();
-		//camera.transform.position += Vector3.right * player.transform.position.x;
-		//camera.transform.position += Vector3.up * player.transform.position.y;
 	}
 
 
@@ -63,6 +73,8 @@ public class Grid : MonoBehaviour
 			MovePlayer(Vector3.right);
 		if (Input.GetKeyDown(KeyCode.A))
 			MovePlayer(Vector3.left);
+		if (Input.GetKeyDown(KeyCode.R))
+			ResetGame();
 	}
 
 
@@ -88,7 +100,8 @@ public class Grid : MonoBehaviour
 	public bool CheckValidPlayerMovement(Vector3 direction)
 	{
 		Vector3 testingNewPosition = player.transform.position + direction * cellSize;
-		//out of grid
+
+		//out of grid check
 		if (Mathf.Abs(testingNewPosition.x) > gridSize / 2 || Mathf.Abs(testingNewPosition.y) > gridSize / 2)
 			return false;
 
@@ -102,7 +115,6 @@ public class Grid : MonoBehaviour
 	{
 		int x = (((int)player.transform.position.x / cellSize) + gridSize / 2) + (int)relative.x;
 		int y = (((int)player.transform.position.y / cellSize) + gridSize / 2) + (int)relative.y;
-		//Debug.Log($"x: {x}   y:{y}");
 
 		if (Mathf.Abs(x) >= gridSize || Mathf.Abs(y) >= gridSize)
 			return null;
@@ -131,54 +143,33 @@ public class Grid : MonoBehaviour
 		return cells;
 	}
 
-	private void RunWorldGeneration()
+	private void WorldCellsPathingCreation()
 	{
-		//cells[10, 10].SetPaths(right: 1);
-		//cells[10, 10].generated = true;
-		recoursiveWorldGen(cells[10, 10]);
+		RecoursiveWorldCellsPathingCreation(cells[10, 10]);
+		Debug.Log($"UnGeneratedCells: {cells.Cast<Cell>().ToList().Where(x => !x.generated).Count()}");
 	}
 
-	private bool recoursiveWorldGen(Cell currentCell)
+	private bool RecoursiveWorldCellsPathingCreation(Cell currentCell)
 	{
 		Debug.Log($"[{generationDepth}] Start recoursiveWorldGen {currentCell.GetGridPosition()}");
 		List<Cell> adiacentCells = GetAdiacentCells(currentCell);
 		Debug.Log($"[{generationDepth}] adiacentCells count: {adiacentCells.Count}");
 
 
-		Cell nextCell = OpenNewPathInCell(currentCell);
+		Cell nextCell = CellSpawn(currentCell);
 		generationDepth++;
 
 		if (nextCell == null)
 			return false;
 		else
 		{
-			bool result = recoursiveWorldGen(nextCell);
+			bool result = RecoursiveWorldCellsPathingCreation(nextCell);
 			if (!result)
 			{
-				return recoursiveWorldGen(currentCell);
+				return RecoursiveWorldCellsPathingCreation(currentCell);
 			}
 			return result;
 		}
-
-		//align adiancent cells with current cell doors open
-		//foreach (Cell adiacentCell in adiacentCells)
-		//{
-		//	Vector3 direction = GetRelativePositionBetweenCells(currentCell, adiacentCell);
-		//	if (currentCell.IsPathAvailable(direction))
-		//	{
-		//		adiacentCell.SetPath(direction * -1, 1);
-		//		Debug.Log($"[{generationDepth}] Cell {adiacentCell.GetGridPosition()} opened backward path {direction * -1}");
-		//	}
-		//}
-		//List<Cell> ungeneratedAdiacentCells = adiacentCells.Where(x => !x.generated).ToList();
-		//if (ungeneratedAdiacentCells.Count > 0)
-		//{
-		//	Cell randomUngeneratedAdiancentCell = ungeneratedAdiacentCells[Random.Range(0, ungeneratedAdiacentCells.Count)];
-		//	Debug.Log($"[{generationDepth}] Picked cell {randomUngeneratedAdiancentCell.GetGridPosition()}");
-		//	OpenNewPathInCell(randomUngeneratedAdiancentCell);
-		//	generationDepth++;
-		//	recoursiveWorldGen(randomUngeneratedAdiancentCell);
-		//}
 	}
 
 	private Vector3 GetRelativePositionBetweenCells(Cell origin, Cell destination)
@@ -186,7 +177,7 @@ public class Grid : MonoBehaviour
 		return destination.GetGridPosition() - origin.GetGridPosition();
 	}
 
-	private Cell OpenNewPathInCell(Cell cell)
+	private Cell CellSpawn(Cell cell)
 	{
 		Cell selectedRandomUngeneratedAdiancentCell = null;
 		List<Cell> adiacentCells = GetAdiacentCells(cell);
@@ -199,8 +190,8 @@ public class Grid : MonoBehaviour
 			cell.SetPath(direction * -1, 1);
 			Debug.Log($"[{generationDepth}] Opened new Path between cells {cell.GetGridPosition()} | {selectedRandomUngeneratedAdiancentCell.GetGridPosition()}");
 
-			//extra path
-			if(Random.Range(0f,1f) <= chanceForSecondPath)
+			//spawn extra path in cell
+			if (Random.Range(0f, 1f) <= chanceForSecondPath)
 			{
 				Cell selectedRandomAdiancentCell = adiacentCells[Random.Range(0, adiacentCells.Count)];
 				Vector3 direction2 = GetRelativePositionBetweenCells(selectedRandomAdiancentCell, cell);
