@@ -7,10 +7,15 @@ public class Cell : MonoBehaviour
 
 	[SerializeField] private SpriteRenderer[] doors;
 	[SerializeField] private SpriteRenderer fogOfWar;
+	[SerializeField] private SpriteRenderer entityIcon;
 
 	private Vector3 gridPosition;
 
+	public bool safeCell = false;
 	public bool generated = false;
+	public bool hasMonster = false;
+	public bool hasTeleporter = false;
+	public bool hasWell = false;
 
 	private int[] paths = new int[4] { 0, 0, 0, 0 };
 
@@ -18,6 +23,10 @@ public class Cell : MonoBehaviour
 	{
 
 	}
+
+	public bool CanMonsterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !safeCell; }
+	public bool CanTeleporterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !safeCell; }
+	public bool CanWellSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !safeCell; }
 
 	public void SetPath(Vector3 direction, int value)
 	{
@@ -89,5 +98,10 @@ public class Cell : MonoBehaviour
 	public Vector3 GetGridPosition()
 	{
 		return gridPosition;
+	}
+	public void SetEntity(Color color)
+	{
+		entityIcon.color = color;
+		entityIcon.gameObject.SetActive(true);
 	}
 }

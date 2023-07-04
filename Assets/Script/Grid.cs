@@ -5,23 +5,31 @@ using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
+	[Header("Grid Data")]
 	[SerializeField] private int gridSize;
 	[SerializeField] private int cellSize;
 
+	[Header("World Gen Values")]
+	[Range(0f, 1f)]
+	[SerializeField] private float ExtraPathInCellChance;
+	[SerializeField] public Vector3 spawnPointGrid;
+	[SerializeField] private int MonstersCount;
+	[SerializeField] private int TeleporterCount;
+	[SerializeField] private int WellCount;
+
+	[Header("References")]
 	[SerializeField] private Cell cellPrefab;
 	[SerializeField] private Player player;
 	[SerializeField] private Camera gameCamera;
 
-	[SerializeField] private float chanceForSecondPath;
-
 	private int generationDepth = 0;
-
 	public static List<Vector3> AdiacentPositions = new List<Vector3>() { Vector3.up, Vector3.right, Vector3.down, Vector3.left };
-
 	private Cell[,] cells;
+	private List<Cell> cellList;
+
+
 	private void Start()
 	{
-		cells = new Cell[gridSize, gridSize];
 		ResetGame();
 	}
 
@@ -34,11 +42,17 @@ public class Grid : MonoBehaviour
 	{
 		WorldCellsInGridInstantiate();
 		WorldCellsPathingCreation();
+		MonsterSpawn();
+		TeleporterSpawn();
+		WellSpawn();
+
+		UpdateGUI();
 	}
 
 	public void WorldCellsInGridInstantiate()
 	{
-		//clear 
+		cells = new Cell[gridSize, gridSize];
+
 		foreach (Transform child in transform)
 		{
 			GameObject.Destroy(child.gameObject);
@@ -53,6 +67,10 @@ public class Grid : MonoBehaviour
 				cells[row, column] = tempCell;
 			}
 		}
+
+		cells[(int)spawnPointGrid.x, (int)spawnPointGrid.y].safeCell = true;
+
+		cellList = cells.Cast<Cell>().ToList();
 	}
 
 
@@ -146,7 +164,7 @@ public class Grid : MonoBehaviour
 	private void WorldCellsPathingCreation()
 	{
 		RecoursiveWorldCellsPathingCreation(cells[10, 10]);
-		Debug.Log($"UnGeneratedCells: {cells.Cast<Cell>().ToList().Where(x => !x.generated).Count()}");
+		Debug.Log($"UnGeneratedCells: {cellList.Where(x => !x.generated).Count()}");
 	}
 
 	private bool RecoursiveWorldCellsPathingCreation(Cell currentCell)
@@ -191,7 +209,7 @@ public class Grid : MonoBehaviour
 			Debug.Log($"[{generationDepth}] Opened new Path between cells {cell.GetGridPosition()} | {selectedRandomUngeneratedAdiancentCell.GetGridPosition()}");
 
 			//spawn extra path in cell
-			if (Random.Range(0f, 1f) <= chanceForSecondPath)
+			if (Random.Range(0f, 1f) <= ExtraPathInCellChance)
 			{
 				Cell selectedRandomAdiancentCell = adiacentCells[Random.Range(0, adiacentCells.Count)];
 				Vector3 direction2 = GetRelativePositionBetweenCells(selectedRandomAdiancentCell, cell);
@@ -202,4 +220,46 @@ public class Grid : MonoBehaviour
 		cell.generated = true;
 		return selectedRandomUngeneratedAdiancentCell;
 	}
+
+	private void MonsterSpawn()
+	{
+		for (int i = 0; i < MonstersCount; i++)
+		{
+			Cell randomizedCell = cellList.Where(x => x.CanMonsterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanMonsterSpawn()).Count())];
+			randomizedCell.hasMonster = true;
+			Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
+		}
+	}
+
+	private void TeleporterSpawn()
+	{
+		for (int i = 0; i < TeleporterCount; i++)
+		{
+			Cell randomizedCell = cellList.Where(x => x.CanTeleporterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanTeleporterSpawn()).Count())];
+			randomizedCell.hasTeleporter = true;
+			Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
+		}
+	}
+	private void WellSpawn()
+	{
+		for (int i = 0; i < WellCount; i++)
+		{
+			Cell randomizedCell = cellList.Where(x => x.CanWellSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanWellSpawn()).Count())];
+			randomizedCell.hasWell = true;
+			Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
+		}
+	}
+
+	public void UpdateGUI()
+	{
+		cellList.Where(x => x.hasMonster).ToList().ForEach(x => x.SetEntity(Color.yellow));
+		cellList.Where(x => x.hasTeleporter).ToList().ForEach(x => x.SetEntity(Color.cyan));
+		cellList.Where(x => x.hasWell).ToList().ForEach(x => x.SetEntity(Color.blue));
+	}
+
+	public void UpdateCellListReference()
+	{
+
+	}
+
 }
