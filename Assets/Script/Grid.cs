@@ -255,7 +255,7 @@ public class Grid : MonoBehaviour
 	{
 		foreach (Cell cell in cellList.Where(x => x.hasMonster).ToList())
 		{
-			cell.SetEntity(Color.yellow);
+			cell.SetEntity(Color.red);
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.ShowBossIcons();
@@ -271,15 +271,12 @@ public class Grid : MonoBehaviour
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasWell).ToList())
 		{
-			cell.SetEntity(Color.blue);
+			cell.SetEntity(Color.green);
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.ShowWellIcons();
 			}
 		}
-		//.ForEach(x => x.SetEntity(Color.yellow));
-		//cellList.Where(x => x.hasTeleporter).ToList().ForEach(x => x.SetEntity(Color.cyan));
-		//cellList.Where(x => x.hasWell).ToList().ForEach(x => x.SetEntity(Color.blue));
 	}
 
 	public void TeleportPlayer()
