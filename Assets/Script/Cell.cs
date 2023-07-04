@@ -9,9 +9,11 @@ public class Cell : MonoBehaviour
 	[SerializeField] private SpriteRenderer fogOfWar;
 	[SerializeField] private SpriteRenderer entityIcon;
 
+	public IconManager IconManager;
+
 	private Vector3 gridPosition;
 
-	public bool safeCell = false;
+	public bool canThreatsSpawn = false;
 	public bool generated = false;
 	public bool hasMonster = false;
 	public bool hasTeleporter = false;
@@ -21,12 +23,13 @@ public class Cell : MonoBehaviour
 
 	private void Awake()
 	{
-
+		IconManager = GetComponentInChildren<IconManager>();
 	}
 
-	public bool CanMonsterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !safeCell; }
-	public bool CanTeleporterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !safeCell; }
-	public bool CanWellSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !safeCell; }
+	public bool CanMonsterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
+	public bool CanTeleporterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
+	public bool CanWellSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
+	public bool IsCellSafeFromThreats() { return !(hasMonster || hasTeleporter || hasWell); }
 
 	public void SetPath(Vector3 direction, int value)
 	{
@@ -103,5 +106,15 @@ public class Cell : MonoBehaviour
 	{
 		entityIcon.color = color;
 		entityIcon.gameObject.SetActive(true);
+	}
+
+	public void OnPlayerEnter(Grid grid)
+	{
+		if (hasMonster)
+			grid.KillPlayer();
+		else if (hasTeleporter)
+			grid.TeleportPlayer();
+		else if (hasWell)
+			grid.KillPlayer();
 	}
 }

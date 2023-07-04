@@ -68,7 +68,7 @@ public class Grid : MonoBehaviour
 			}
 		}
 
-		cells[(int)spawnPointGrid.x, (int)spawnPointGrid.y].safeCell = true;
+		cells[(int)spawnPointGrid.x, (int)spawnPointGrid.y].canThreatsSpawn = true;
 
 		cellList = cells.Cast<Cell>().ToList();
 	}
@@ -101,7 +101,8 @@ public class Grid : MonoBehaviour
 		if (CheckValidPlayerMovement(direction))
 		{
 			player.transform.position += direction * cellSize;
-			GetPlayerCellRelative(Vector3.zero).HideFogOfWar();
+			Cell destinationCell = GetPlayerCellRelative(Vector3.zero);
+			SetPlayerPositionToCell(destinationCell);
 		}
 	}
 
@@ -252,14 +253,50 @@ public class Grid : MonoBehaviour
 
 	public void UpdateGUI()
 	{
-		cellList.Where(x => x.hasMonster).ToList().ForEach(x => x.SetEntity(Color.yellow));
-		cellList.Where(x => x.hasTeleporter).ToList().ForEach(x => x.SetEntity(Color.cyan));
-		cellList.Where(x => x.hasWell).ToList().ForEach(x => x.SetEntity(Color.blue));
+		foreach (Cell cell in cellList.Where(x => x.hasMonster).ToList())
+		{
+			cell.SetEntity(Color.yellow);
+			foreach (Cell adiacentCell in GetAdiacentCells(cell))
+			{
+				adiacentCell.IconManager.ShowBossIcons();
+			}
+		}
+		foreach (Cell cell in cellList.Where(x => x.hasTeleporter).ToList())
+		{
+			cell.SetEntity(Color.cyan);
+			foreach (Cell adiacentCell in GetAdiacentCells(cell))
+			{
+				adiacentCell.IconManager.ShowTeleportIcons();
+			}
+		}
+		foreach (Cell cell in cellList.Where(x => x.hasWell).ToList())
+		{
+			cell.SetEntity(Color.blue);
+			foreach (Cell adiacentCell in GetAdiacentCells(cell))
+			{
+				adiacentCell.IconManager.ShowWellIcons();
+			}
+		}
+		//.ForEach(x => x.SetEntity(Color.yellow));
+		//cellList.Where(x => x.hasTeleporter).ToList().ForEach(x => x.SetEntity(Color.cyan));
+		//cellList.Where(x => x.hasWell).ToList().ForEach(x => x.SetEntity(Color.blue));
 	}
 
-	public void UpdateCellListReference()
+	public void TeleportPlayer()
 	{
-
+		Cell randomizedCell = cellList.Where(x => x.IsCellSafeFromThreats()).ToList()[Random.Range(0, cellList.Where(x => x.IsCellSafeFromThreats()).Count())];
+		SetPlayerPositionToCell(randomizedCell);
 	}
 
+	public void KillPlayer()
+	{
+		Debug.Log("YOU DIED");
+	}
+
+	public void SetPlayerPositionToCell(Cell cell)
+	{
+		player.transform.position = new Vector3(cell.transform.position.x, cell.transform.position.y, player.transform.position.z);
+		cell.HideFogOfWar();
+		cell.OnPlayerEnter(this);
+	}
 }
