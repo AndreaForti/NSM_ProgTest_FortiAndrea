@@ -11,8 +11,8 @@ public class Player : MonoBehaviour
 	{
 		if (arrowCount <= 0)
 			return;
-		Vector3 arrowPositin = new Vector3(transform.position.x + direction.x * gridRef.cellSize, transform.position.y + direction.y * gridRef.cellSize, -0.04f);
-		Arrow arrow = Instantiate(arrowPrefab, , Quaternion.identity);
+		Vector3 arrowPosition = transform.position + direction * gridRef.cellSize;
+		Arrow arrow = Instantiate(arrowPrefab, arrowPosition, Quaternion.identity);
 		//arrow.spriteRenderer.gameObject.transform.Rotate(0f, 0f, 90);
 		arrow.direction = direction;
 		arrow.grid = gridRef;

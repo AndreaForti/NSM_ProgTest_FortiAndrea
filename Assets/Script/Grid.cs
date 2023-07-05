@@ -208,7 +208,7 @@ public class Grid : MonoBehaviour
 	public void PlayerSpawn()
 	{
 		Vector3 cellPosition = cells[(int)spawnPointGrid.x, (int)spawnPointGrid.y].transform.position;
-		player.transform.position = new Vector3(cellPosition.x, cellPosition.y, player.transform.position.z);
+		player.transform.position = cellPosition;
 		player.transform.localScale = new Vector3(cellSize, cellSize, player.transform.localScale.z);
 		GetPlayerCellRelative(Vector3.zero).HideFogOfWar();
 	}

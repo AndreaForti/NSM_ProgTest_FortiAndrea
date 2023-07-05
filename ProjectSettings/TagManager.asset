@@ -41,3 +41,27 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: WorldBackground
+    uniqueID: 1672884533
+    locked: 0
+  - name: CellBackground
+    uniqueID: 314609983
+    locked: 0
+  - name: CellWalls
+    uniqueID: 1662151213
+    locked: 0
+  - name: CellInfoIcons
+    uniqueID: 3692020497
+    locked: 0
+  - name: CellEntity
+    uniqueID: 129837063
+    locked: 0
+  - name: Projectiles
+    uniqueID: 2902295707
+    locked: 0
+  - name: Player
+    uniqueID: 2192366095
+    locked: 0
+  - name: FogOfWar
+    uniqueID: 2319421559
+    locked: 0

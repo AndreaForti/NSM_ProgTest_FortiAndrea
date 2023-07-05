@@ -5,11 +5,7 @@ using System.Linq;
 
 public class IconManager : MonoBehaviour
 {
-	[SerializeField] private SpriteRenderer[] BossIcons = new SpriteRenderer[4];
-	[SerializeField] private SpriteRenderer[] TeleportIcons = new SpriteRenderer[4];
-	[SerializeField] private SpriteRenderer[] WellIcons = new SpriteRenderer[4];
 	[SerializeField] private SpriteRenderer[] IconSlots = new SpriteRenderer[3];
-
 
 	[Header("Icons")]
 	[SerializeField] private Sprite MonsterSprite;
