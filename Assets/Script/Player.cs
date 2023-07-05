@@ -4,21 +4,18 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-	[SerializeField] int ArrowsOnSpawn;
+	[SerializeField] private Arrow arrowPrefab;
+	private int arrowCount = 5;
 
-	private int currentArrowsCount;
-
-
-	private void Start()
+	public void Shoot(Vector3 direction, Grid gridRef)
 	{
-		currentArrowsCount = ArrowsOnSpawn;
-	}
-
-	public void FireArrow(Vector3 direction)
-	{
-		if (currentArrowsCount > 0)
-		{
-
-		}
+		if (arrowCount <= 0)
+			return;
+		Vector3 arrowPositin = new Vector3(transform.position.x + direction.x * gridRef.cellSize, transform.position.y + direction.y * gridRef.cellSize, -0.04f);
+		Arrow arrow = Instantiate(arrowPrefab, , Quaternion.identity);
+		//arrow.spriteRenderer.gameObject.transform.Rotate(0f, 0f, 90);
+		arrow.direction = direction;
+		arrow.grid = gridRef;
+		arrowCount--;
 	}
 }

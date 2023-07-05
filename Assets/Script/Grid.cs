@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Transactions;
 using Unity.VisualScripting;
 using UnityEngine;
 using static IconManager;
@@ -9,7 +10,7 @@ public class Grid : MonoBehaviour
 {
 	[Header("Grid Data")]
 	[SerializeField] private int gridSize;
-	[SerializeField] private int cellSize;
+	[SerializeField] public int cellSize;
 
 	[Header("World Gen Values")]
 	[Range(0f, 1f)]
@@ -52,8 +53,18 @@ public class Grid : MonoBehaviour
 			MovePlayer(Vector3.right);
 		if (Input.GetKeyDown(KeyCode.A))
 			MovePlayer(Vector3.left);
+
 		if (Input.GetKeyDown(KeyCode.R))
 			ResetGame();
+
+		if (Input.GetKeyDown(KeyCode.I))
+			player.Shoot(Vector3.up, this);
+		if (Input.GetKeyDown(KeyCode.J))
+			player.Shoot(Vector3.left, this);
+		if (Input.GetKeyDown(KeyCode.K))
+			player.Shoot(Vector3.down, this);
+		if (Input.GetKeyDown(KeyCode.L))
+			player.Shoot(Vector3.right, this);
 	}
 
 	#region PLAYER
@@ -83,12 +94,24 @@ public class Grid : MonoBehaviour
 
 	public Cell GetPlayerCellRelative(Vector3 relative)
 	{
-		int x = (((int)player.transform.position.x / cellSize) + gridSize / 2) + (int)relative.x;
-		int y = (((int)player.transform.position.y / cellSize) + gridSize / 2) + (int)relative.y;
+		Vector2Int cellGridPos = GetCellGridPositionFromWorldPos(player.transform.position + relative * cellSize);
+		//int x = (((int)player.transform.position.x / cellSize) + gridSize / 2) + (int)relative.x;
+		//int y = (((int)player.transform.position.y / cellSize) + gridSize / 2) + (int)relative.y;
 
-		if (Mathf.Abs(x) >= gridSize || Mathf.Abs(y) >= gridSize)
+		if (Mathf.Abs(cellGridPos.x) >= gridSize || Mathf.Abs(cellGridPos.y) >= gridSize)
 			return null;
-		return cells[x, y];
+		return cells[cellGridPos.x, cellGridPos.y];
+	}
+
+	public Cell getCellFromWorldPosition(Vector3 position)
+	{
+		Vector2Int cellGridPos = GetCellGridPositionFromWorldPos(position);
+		return cells[cellGridPos.x, cellGridPos.y];
+	}
+
+	public Vector2Int GetCellGridPositionFromWorldPos(Vector3 position)
+	{
+		return new Vector2Int((int)((position.x / cellSize) + gridSize / 2), (int)((position.y / cellSize) + gridSize / 2));
 	}
 
 	public void TeleportPlayer()
@@ -102,6 +125,10 @@ public class Grid : MonoBehaviour
 		Debug.Log("YOU DIED");
 	}
 
+	public void PlayerWin()
+	{
+		Debug.Log("YOU WIN");
+	}
 	public void SetPlayerPositionToCell(Cell cell)
 	{
 		player.transform.position = new Vector3(cell.transform.position.x, cell.transform.position.y, player.transform.position.z);
@@ -295,6 +322,23 @@ public class Grid : MonoBehaviour
 			}
 		}
 	}
+
+	public void UpdateArrowMove(Arrow arrow)
+	{
+		Cell currentArrowCell = getCellFromWorldPosition(arrow.transform.position);
+
+		if (currentArrowCell.IsPathAvailable(arrow.direction))
+		{
+			Cell destinationArrowCell = GetAdiancentCell(currentArrowCell, arrow.direction);
+			if (destinationArrowCell != null)
+				destinationArrowCell.OnArrowEnter(this, arrow);
+			else
+				arrow.DestroyArrow();
+		}
+		else
+			arrow.DestroyArrow();
+	}
+
 	#endregion
 
 	private void OnDrawGizmos()

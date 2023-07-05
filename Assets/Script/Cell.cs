@@ -92,4 +92,10 @@ public class Cell : MonoBehaviour
 		else if (hasWell)
 			grid.KillPlayer();
 	}
+
+	public void OnArrowEnter(Grid grid, Arrow arrow)
+	{
+		if(hasMonster)
+			grid.PlayerWin();
+	}
 }

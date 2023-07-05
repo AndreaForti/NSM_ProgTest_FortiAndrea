@@ -270,7 +270,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: 21
-  cellSize: 10
+  cellSize: 5
   ExtraPathInCellChance: 0.3
   spawnPointGrid: {x: 0, y: 0, z: 0}
   MonstersCount: 1
