@@ -19,6 +19,8 @@ public class Arrow : MonoBehaviour
 	}
 	private void Start()
 	{
+		spriteRenderer.transform.localScale *= grid.cellSize;
+		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, direction, Vector3.forward));
 		StartPositinUpdateCoroutine();
 	}
 
@@ -31,7 +33,7 @@ public class Arrow : MonoBehaviour
 	{
 		while (true)
 		{
-			yield return new WaitForSeconds(2);
+			yield return new WaitForSeconds(1);
 			grid.UpdateArrowMove(this);
 			transform.position += direction * grid.cellSize;
 		}
@@ -39,6 +41,7 @@ public class Arrow : MonoBehaviour
 
 	public void DestroyArrow()
 	{
+		grid.RepositionMonster();
 		StopAllCoroutines();
 		Destroy(gameObject);
 	}
