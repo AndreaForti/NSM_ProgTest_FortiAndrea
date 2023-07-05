@@ -41,6 +41,106 @@ public class Grid : MonoBehaviour
 		WorldGen();
 		PlayerSpawn();
 	}
+
+	void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.W))
+			MovePlayer(Vector3.up);
+		if (Input.GetKeyDown(KeyCode.S))
+			MovePlayer(Vector3.down);
+		if (Input.GetKeyDown(KeyCode.D))
+			MovePlayer(Vector3.right);
+		if (Input.GetKeyDown(KeyCode.A))
+			MovePlayer(Vector3.left);
+		if (Input.GetKeyDown(KeyCode.R))
+			ResetGame();
+	}
+
+	#region PLAYER
+	private void MovePlayer(Vector3 direction)
+	{
+		if (CheckValidPlayerMovement(direction))
+		{
+			player.transform.position += direction * cellSize;
+			Cell destinationCell = GetPlayerCellRelative(Vector3.zero);
+			SetPlayerPositionToCell(destinationCell);
+		}
+	}
+
+	public bool CheckValidPlayerMovement(Vector3 direction)
+	{
+		Vector3 testingNewPosition = player.transform.position + direction * cellSize;
+
+		//out of grid check
+		if (Mathf.Abs(testingNewPosition.x) > gridSize * cellSize / 2 || Mathf.Abs(testingNewPosition.y) > gridSize * cellSize / 2)
+			return false;
+
+		if (!GetPlayerCellRelative(Vector3.zero).IsPathAvailable(direction))
+			return false;
+
+		return true;
+	}
+
+	public Cell GetPlayerCellRelative(Vector3 relative)
+	{
+		int x = (((int)player.transform.position.x / cellSize) + gridSize / 2) + (int)relative.x;
+		int y = (((int)player.transform.position.y / cellSize) + gridSize / 2) + (int)relative.y;
+
+		if (Mathf.Abs(x) >= gridSize || Mathf.Abs(y) >= gridSize)
+			return null;
+		return cells[x, y];
+	}
+
+	public void TeleportPlayer()
+	{
+		Cell randomizedCell = cellList.Where(x => x.IsCellSafeFromThreats()).ToList()[Random.Range(0, cellList.Where(x => x.IsCellSafeFromThreats()).Count())];
+		SetPlayerPositionToCell(randomizedCell);
+	}
+
+	public void KillPlayer()
+	{
+		Debug.Log("YOU DIED");
+	}
+
+	public void SetPlayerPositionToCell(Cell cell)
+	{
+		player.transform.position = new Vector3(cell.transform.position.x, cell.transform.position.y, player.transform.position.z);
+		cell.HideFogOfWar();
+		cell.OnPlayerEnter(this);
+	}
+	#endregion
+
+	#region ACCESS DATA
+
+	public Cell GetAdiancentCell(Cell currentCell, Vector3 relative)
+	{
+		Vector3 adiacentCellPosition = currentCell.GetGridPosition() + relative;
+		if (adiacentCellPosition.x < 0 || adiacentCellPosition.x >= gridSize || adiacentCellPosition.y >= gridSize || adiacentCellPosition.y < 0)
+			return null;
+		//Debug.Log($"GetAdiancentCell: {(int)adiacentCellPosition.x} | {(int)adiacentCellPosition.y}");
+		return cells[(int)adiacentCellPosition.x, (int)adiacentCellPosition.y];
+	}
+
+	public List<Cell> GetAdiacentCells(Cell currentCell)
+	{
+		List<Cell> cells = new List<Cell>();
+
+		foreach (Vector3 relativePosition in AdiacentPositions)
+		{
+			Cell tempCell = GetAdiancentCell(currentCell, relativePosition);
+			if (tempCell != null)
+				cells.Add(tempCell);
+		}
+		return cells;
+	}
+
+	private Vector3 GetRelativePositionBetweenCells(Cell origin, Cell destination)
+	{
+		return destination.GetGridPosition() - origin.GetGridPosition();
+	}
+	#endregion
+
+	#region WORLDGEN
 	public void WorldGen()
 	{
 		WorldCellsInGridInstantiate();
@@ -80,93 +180,11 @@ public class Grid : MonoBehaviour
 
 	public void PlayerSpawn()
 	{
-		player.transform.position = cells[(int)spawnPointGrid.x, (int)spawnPointGrid.y].transform.position;
-		player.transform.localScale = new Vector3(cellSize, cellSize, 1);
+		Vector3 cellPosition = cells[(int)spawnPointGrid.x, (int)spawnPointGrid.y].transform.position;
+		player.transform.position = new Vector3(cellPosition.x, cellPosition.y, player.transform.position.z);
+		player.transform.localScale = new Vector3(cellSize, cellSize, player.transform.localScale.z);
 		GetPlayerCellRelative(Vector3.zero).HideFogOfWar();
 	}
-
-
-	void Update()
-	{
-		if (Input.GetKeyDown(KeyCode.W))
-			MovePlayer(Vector3.up);
-		if (Input.GetKeyDown(KeyCode.S))
-			MovePlayer(Vector3.down);
-		if (Input.GetKeyDown(KeyCode.D))
-			MovePlayer(Vector3.right);
-		if (Input.GetKeyDown(KeyCode.A))
-			MovePlayer(Vector3.left);
-		if (Input.GetKeyDown(KeyCode.R))
-			ResetGame();
-	}
-
-
-	private void MovePlayer(Vector3 direction)
-	{
-		if (CheckValidPlayerMovement(direction))
-		{
-			player.transform.position += direction * cellSize;
-			Cell destinationCell = GetPlayerCellRelative(Vector3.zero);
-			SetPlayerPositionToCell(destinationCell);
-		}
-	}
-
-	private void OnDrawGizmos()
-	{
-		Gizmos.color = Color.magenta;
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2, transform.position + (Vector3.right + Vector3.down) * gridSize / 2);
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.up) * gridSize / 2, transform.position + (Vector3.right + Vector3.up) * gridSize / 2);
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2, transform.position + (Vector3.left + Vector3.up) * gridSize / 2);
-		Gizmos.DrawLine(transform.position + (Vector3.right + Vector3.down) * gridSize / 2, transform.position + (Vector3.right + Vector3.up) * gridSize / 2);
-
-	}
-
-	public bool CheckValidPlayerMovement(Vector3 direction)
-	{
-		Vector3 testingNewPosition = player.transform.position + direction * cellSize;
-
-		//out of grid check
-		if (Mathf.Abs(testingNewPosition.x) > gridSize * cellSize / 2 || Mathf.Abs(testingNewPosition.y) > gridSize * cellSize / 2)
-			return false;
-
-		if (!GetPlayerCellRelative(Vector3.zero).IsPathAvailable(direction))
-			return false;
-
-		return true;
-	}
-
-	public Cell GetPlayerCellRelative(Vector3 relative)
-	{
-		int x = (((int)player.transform.position.x / cellSize) + gridSize / 2) + (int)relative.x;
-		int y = (((int)player.transform.position.y / cellSize) + gridSize / 2) + (int)relative.y;
-
-		if (Mathf.Abs(x) >= gridSize || Mathf.Abs(y) >= gridSize)
-			return null;
-		return cells[x, y];
-	}
-
-	public Cell GetAdiancentCell(Cell currentCell, Vector3 relative)
-	{
-		Vector3 adiacentCellPosition = currentCell.GetGridPosition() + relative;
-		if (adiacentCellPosition.x < 0 || adiacentCellPosition.x >= gridSize || adiacentCellPosition.y >= gridSize || adiacentCellPosition.y < 0)
-			return null;
-		//Debug.Log($"GetAdiancentCell: {(int)adiacentCellPosition.x} | {(int)adiacentCellPosition.y}");
-		return cells[(int)adiacentCellPosition.x, (int)adiacentCellPosition.y];
-	}
-
-	public List<Cell> GetAdiacentCells(Cell currentCell)
-	{
-		List<Cell> cells = new List<Cell>();
-
-		foreach (Vector3 relativePosition in AdiacentPositions)
-		{
-			Cell tempCell = GetAdiancentCell(currentCell, relativePosition);
-			if (tempCell != null)
-				cells.Add(tempCell);
-		}
-		return cells;
-	}
-
 	private void WorldCellsPathingCreation()
 	{
 		RecoursiveWorldCellsPathingCreation(cells[10, 10]);
@@ -195,12 +213,6 @@ public class Grid : MonoBehaviour
 			return result;
 		}
 	}
-
-	private Vector3 GetRelativePositionBetweenCells(Cell origin, Cell destination)
-	{
-		return destination.GetGridPosition() - origin.GetGridPosition();
-	}
-
 	private Cell CellSpawn(Cell cell)
 	{
 		Cell selectedRandomUngeneratedAdiancentCell = null;
@@ -283,22 +295,15 @@ public class Grid : MonoBehaviour
 			}
 		}
 	}
+	#endregion
 
-	public void TeleportPlayer()
+	private void OnDrawGizmos()
 	{
-		Cell randomizedCell = cellList.Where(x => x.IsCellSafeFromThreats()).ToList()[Random.Range(0, cellList.Where(x => x.IsCellSafeFromThreats()).Count())];
-		SetPlayerPositionToCell(randomizedCell);
-	}
+		Gizmos.color = Color.magenta;
+		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2, transform.position + (Vector3.right + Vector3.down) * gridSize / 2);
+		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.up) * gridSize / 2, transform.position + (Vector3.right + Vector3.up) * gridSize / 2);
+		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2, transform.position + (Vector3.left + Vector3.up) * gridSize / 2);
+		Gizmos.DrawLine(transform.position + (Vector3.right + Vector3.down) * gridSize / 2, transform.position + (Vector3.right + Vector3.up) * gridSize / 2);
 
-	public void KillPlayer()
-	{
-		Debug.Log("YOU DIED");
-	}
-
-	public void SetPlayerPositionToCell(Cell cell)
-	{
-		player.transform.position = new Vector3(cell.transform.position.x, cell.transform.position.y, player.transform.position.z);
-		cell.HideFogOfWar();
-		cell.OnPlayerEnter(this);
 	}
 }

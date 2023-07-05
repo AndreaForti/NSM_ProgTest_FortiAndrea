@@ -6,14 +6,12 @@ using UnityEngine.SceneManagement;
 
 public class MenuFunctions : MonoBehaviour
 {
-
 	[SerializeField] private TextMeshProUGUI loading;
 	public void Play()
 	{
 		loading.gameObject.SetActive(true);
 		StartLoadGameScene();
 	}
-
 
 	void StartLoadGameScene()
 	{

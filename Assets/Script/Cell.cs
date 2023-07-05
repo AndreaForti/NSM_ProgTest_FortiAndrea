@@ -11,25 +11,23 @@ public class Cell : MonoBehaviour
 
 	public IconManager IconManager;
 
-	private Vector3 gridPosition;
-
 	public bool canThreatsSpawn = false;
 	public bool generated = false;
 	public bool hasMonster = false;
 	public bool hasTeleporter = false;
 	public bool hasWell = false;
 
+	private Vector3 gridPosition;
 	private int[] paths = new int[4] { 0, 0, 0, 0 };
+	public bool CanMonsterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
+	public bool CanTeleporterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
+	public bool CanWellSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
+	public bool IsCellSafeFromThreats() { return !(hasMonster || hasTeleporter || hasWell); }
 
 	private void Awake()
 	{
 		IconManager = GetComponentInChildren<IconManager>();
 	}
-
-	public bool CanMonsterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
-	public bool CanTeleporterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
-	public bool CanWellSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
-	public bool IsCellSafeFromThreats() { return !(hasMonster || hasTeleporter || hasWell); }
 
 	public void SetPath(Vector3 direction, int value)
 	{
@@ -41,28 +39,6 @@ public class Cell : MonoBehaviour
 			paths[2] = value;
 		if (direction == Vector3.left)
 			paths[3] = value;
-		UpdateDoors();
-	}
-
-	public void SetPaths(int top = -1, int right = -1, int down = -1, int left = -1)
-	{
-		if (top != -1)
-			paths[0] = top;
-		if (right != -1)
-			paths[1] = right;
-		if (down != -1)
-			paths[2] = down;
-		if (left != -1)
-			paths[3] = left;
-		UpdateDoors();
-	}
-
-	public void RandomizePaths()
-	{
-		paths[0] = Random.Range(0, 2);
-		paths[1] = Random.Range(0, 2);
-		paths[2] = Random.Range(0, 2);
-		paths[3] = Random.Range(0, 2);
 		UpdateDoors();
 	}
 
@@ -95,7 +71,6 @@ public class Cell : MonoBehaviour
 	public void SetGridPosition(int x, int y)
 	{
 		gridPosition = new Vector3(x, y);
-		//Debug.Log($"Set Grid Position : {x} | {y}");
 	}
 
 	public Vector3 GetGridPosition()
