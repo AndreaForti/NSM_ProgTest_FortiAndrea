@@ -16,10 +16,11 @@ public class Cell : MonoBehaviour
 	public bool hasMonster = false;
 	public bool hasTeleporter = false;
 	public bool hasWell = false;
+	public bool isHidden = true;
 
 	private Vector3 gridPosition;
 	private int[] paths = new int[4] { 0, 0, 0, 0 };
-	public bool CanMonsterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
+	public bool CanMonsterSpawn() { return !hasMonster && !hasTeleporter && !hasWell && !canThreatsSpawn && isHidden; }
 	public bool CanTeleporterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
 	public bool CanWellSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
 	public bool IsCellSafeFromThreats() { return !(hasMonster || hasTeleporter || hasWell); }
@@ -66,6 +67,7 @@ public class Cell : MonoBehaviour
 	public void HideFogOfWar()
 	{
 		fogOfWar.gameObject.SetActive(false);
+		isHidden = false;
 	}
 
 	public void SetGridPosition(int x, int y)
@@ -83,6 +85,12 @@ public class Cell : MonoBehaviour
 		entityIcon.gameObject.SetActive(true);
 	}
 
+	public void ClearEntyty()
+	{
+		entityIcon.gameObject.SetActive(false);
+		IconManager.Clear();
+	}
+
 	public void OnPlayerEnter(Grid grid)
 	{
 		if (hasMonster)
@@ -95,7 +103,7 @@ public class Cell : MonoBehaviour
 
 	public void OnArrowEnter(Grid grid, Arrow arrow)
 	{
-		if(hasMonster)
+		if (hasMonster)
 			grid.PlayerWin();
 	}
 }

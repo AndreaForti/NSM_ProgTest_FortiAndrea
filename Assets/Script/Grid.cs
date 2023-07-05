@@ -297,6 +297,7 @@ public class Grid : MonoBehaviour
 
 	public void UpdateGUI()
 	{
+		cellList.ForEach(x => x.ClearEntyty());
 		foreach (Cell cell in cellList.Where(x => x.hasMonster).ToList())
 		{
 			cell.SetEntity(Color.red);
@@ -339,15 +340,23 @@ public class Grid : MonoBehaviour
 			arrow.DestroyArrow();
 	}
 
+	public void RepositionMonster()
+	{
+		foreach (Cell monsterCell in cellList.Where(x => x.hasMonster).ToList())
+			monsterCell.hasMonster = false;
+		MonsterSpawn();
+		UpdateGUI();
+	}
+
 	#endregion
 
 	private void OnDrawGizmos()
 	{
 		Gizmos.color = Color.magenta;
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2, transform.position + (Vector3.right + Vector3.down) * gridSize / 2);
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.up) * gridSize / 2, transform.position + (Vector3.right + Vector3.up) * gridSize / 2);
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2, transform.position + (Vector3.left + Vector3.up) * gridSize / 2);
-		Gizmos.DrawLine(transform.position + (Vector3.right + Vector3.down) * gridSize / 2, transform.position + (Vector3.right + Vector3.up) * gridSize / 2);
+		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2 * cellSize, transform.position + (Vector3.right + Vector3.down) * gridSize / 2 * cellSize);
+		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.up) * gridSize / 2 * cellSize, transform.position + (Vector3.right + Vector3.up) * gridSize / 2 * cellSize);
+		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2 * cellSize, transform.position + (Vector3.left + Vector3.up) * gridSize / 2 * cellSize);
+		Gizmos.DrawLine(transform.position + (Vector3.right + Vector3.down) * gridSize / 2 * cellSize, transform.position + (Vector3.right + Vector3.up) * gridSize / 2 * cellSize);
 
 	}
 }
