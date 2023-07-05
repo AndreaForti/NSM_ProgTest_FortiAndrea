@@ -269,13 +269,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d903ff290f9f7424f95b85d08c718953, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 21
-  cellSize: 5
-  ExtraPathInCellChance: 0.3
-  spawnPointGrid: {x: 0, y: 0, z: 0}
+  gridSize: 20
+  cellSize: 20
+  ExtraPathInCellChance: 0.35
+  spawnPointGrid: {x: 10, y: 10, z: 0}
   MonstersCount: 1
-  TeleporterCount: 4
-  WellCount: 3
+  TeleporterCount: 8
+  WellCount: 6
   cellPrefab: {fileID: 2833113274369744467, guid: 09111f4484400c642abe55d30ba6528c, type: 3}
   player: {fileID: 1225046701}
   gameCamera: {fileID: 1793366926}
@@ -331,7 +331,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.25490198, g: 0.25490198, b: 0.25490198, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -348,7 +348,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 2.5
+  orthographic size: 2
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
