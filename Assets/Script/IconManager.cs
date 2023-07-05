@@ -32,6 +32,12 @@ public class IconManager : MonoBehaviour
 		iconPointer++;
 	}
 
+	public void Clear()
+	{
+		iconPointer = 0;
+		IconSlots.ToList().ForEach(x => x.gameObject.SetActive(false));
+	}
+
 	public enum IconType
 	{
 		Monster,
