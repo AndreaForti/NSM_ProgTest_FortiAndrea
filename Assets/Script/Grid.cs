@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
+using static IconManager;
 
 public class Grid : MonoBehaviour
 {
@@ -31,6 +33,7 @@ public class Grid : MonoBehaviour
 	private void Start()
 	{
 		ResetGame();
+		gameCamera.orthographicSize *= cellSize;
 	}
 
 	public void ResetGame()
@@ -63,6 +66,7 @@ public class Grid : MonoBehaviour
 			for (int column = 0; column < gridSize; column++)
 			{
 				Cell tempCell = Instantiate(cellPrefab, transform.position + new Vector3(row - gridSize / 2, column - gridSize / 2, 0f) * cellSize, Quaternion.identity, transform);
+				tempCell.gameObject.transform.localScale = new Vector3(cellSize, cellSize, 1);
 				tempCell.SetGridPosition(row, column);
 				cells[row, column] = tempCell;
 			}
@@ -76,7 +80,8 @@ public class Grid : MonoBehaviour
 
 	public void PlayerSpawn()
 	{
-		player.transform.position = transform.position + Vector3.forward * -1;
+		player.transform.position = cells[(int)spawnPointGrid.x, (int)spawnPointGrid.y].transform.position;
+		player.transform.localScale = new Vector3(cellSize, cellSize, 1);
 		GetPlayerCellRelative(Vector3.zero).HideFogOfWar();
 	}
 
@@ -121,7 +126,7 @@ public class Grid : MonoBehaviour
 		Vector3 testingNewPosition = player.transform.position + direction * cellSize;
 
 		//out of grid check
-		if (Mathf.Abs(testingNewPosition.x) > gridSize / 2 || Mathf.Abs(testingNewPosition.y) > gridSize / 2)
+		if (Mathf.Abs(testingNewPosition.x) > gridSize * cellSize / 2 || Mathf.Abs(testingNewPosition.y) > gridSize * cellSize / 2)
 			return false;
 
 		if (!GetPlayerCellRelative(Vector3.zero).IsPathAvailable(direction))
@@ -258,7 +263,7 @@ public class Grid : MonoBehaviour
 			cell.SetEntity(Color.red);
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
-				adiacentCell.IconManager.ShowBossIcons();
+				adiacentCell.IconManager.AddIcon(IconType.Monster);
 			}
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasTeleporter).ToList())
@@ -266,7 +271,7 @@ public class Grid : MonoBehaviour
 			cell.SetEntity(Color.cyan);
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
-				adiacentCell.IconManager.ShowTeleportIcons();
+				adiacentCell.IconManager.AddIcon(IconType.Telporter);
 			}
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasWell).ToList())
@@ -274,7 +279,7 @@ public class Grid : MonoBehaviour
 			cell.SetEntity(Color.green);
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
-				adiacentCell.IconManager.ShowWellIcons();
+				adiacentCell.IconManager.AddIcon(IconType.Well);
 			}
 		}
 	}

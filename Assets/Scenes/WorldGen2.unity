@@ -238,7 +238,7 @@ Transform:
   - {fileID: 1523976524}
   - {fileID: 1225046702}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1523976522
 GameObject:
@@ -270,9 +270,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: 21
-  cellSize: 1
+  cellSize: 10
   ExtraPathInCellChance: 0.3
-  spawnPointGrid: {x: 10, y: 10, z: 0}
+  spawnPointGrid: {x: 0, y: 0, z: 0}
   MonstersCount: 1
   TeleporterCount: 4
   WellCount: 3
@@ -348,7 +348,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 11
+  orthographic size: 2.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -372,11 +372,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1793366924}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -9}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1225046702}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1793366928
@@ -420,7 +420,19 @@ PrefabInstance:
     m_TransformParent: {fileID: 1520743974}
     m_Modifications:
     - target: {fileID: 35408908524420656, guid: 0adc257fbfdad764fbd42c9e9c1d3a04, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 35408908524420656, guid: 0adc257fbfdad764fbd42c9e9c1d3a04, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 35408908524420656, guid: 0adc257fbfdad764fbd42c9e9c1d3a04, type: 3}
       propertyPath: m_LocalScale.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 35408908524420656, guid: 0adc257fbfdad764fbd42c9e9c1d3a04, type: 3}
+      propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5396585256441278261, guid: 0adc257fbfdad764fbd42c9e9c1d3a04, type: 3}
