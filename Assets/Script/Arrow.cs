@@ -35,8 +35,14 @@ public class Arrow : MonoBehaviour
 		{
 			yield return new WaitForSeconds(1);
 			grid.UpdateArrowMove(this);
-			transform.position += direction * grid.cellSize;
+
 		}
+	}
+
+	public void ApplyMovement()
+	{
+		transform.position += direction * grid.cellSize;
+		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, direction, Vector3.forward));
 	}
 
 	public void DestroyArrow()

@@ -19,6 +19,7 @@ public class Grid : MonoBehaviour
 	[SerializeField] private int MonstersCount;
 	[SerializeField] private int TeleporterCount;
 	[SerializeField] private int WellCount;
+	[SerializeField] private int TunnelCount;
 
 	[Header("References")]
 	[SerializeField] private Cell cellPrefab;
@@ -68,13 +69,13 @@ public class Grid : MonoBehaviour
 	}
 
 	#region PLAYER
-	private void MovePlayer(Vector3 direction)
+	public void MovePlayer(Vector3 direction)
 	{
 		if (CheckValidPlayerMovement(direction))
 		{
 			player.transform.position += direction * cellSize;
 			Cell destinationCell = GetPlayerCellRelative(Vector3.zero);
-			SetPlayerPositionToCell(destinationCell);
+			SetPlayerPositionToCell(destinationCell, direction * -1);
 		}
 	}
 
@@ -116,8 +117,8 @@ public class Grid : MonoBehaviour
 
 	public void TeleportPlayer()
 	{
-		Cell randomizedCell = cellList.Where(x => x.IsCellSafeFromThreats()).ToList()[Random.Range(0, cellList.Where(x => x.IsCellSafeFromThreats()).Count())];
-		SetPlayerPositionToCell(randomizedCell);
+		Cell randomizedCell = cellList.Where(x => x.IsCellSafeFromThreats() && !x.isTunnel).ToList()[Random.Range(0, cellList.Where(x => x.IsCellSafeFromThreats()).Count())];
+		SetPlayerPositionToCell(randomizedCell, Vector3.zero);
 	}
 
 	public void KillPlayer()
@@ -129,11 +130,11 @@ public class Grid : MonoBehaviour
 	{
 		Debug.Log("YOU WIN");
 	}
-	public void SetPlayerPositionToCell(Cell cell)
+	public void SetPlayerPositionToCell(Cell cell, Vector3 enteringFromDirection)
 	{
 		player.transform.position = new Vector3(cell.transform.position.x, cell.transform.position.y, player.transform.position.z);
 		cell.HideFogOfWar();
-		cell.OnPlayerEnter(this);
+		cell.OnPlayerEnter(this, enteringFromDirection);
 	}
 	#endregion
 
@@ -175,6 +176,7 @@ public class Grid : MonoBehaviour
 		MonsterSpawn();
 		TeleporterSpawn();
 		WellSpawn();
+		TunnelSpawn();
 
 		UpdateGUI();
 	}
@@ -292,6 +294,17 @@ public class Grid : MonoBehaviour
 			Cell randomizedCell = cellList.Where(x => x.CanWellSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanWellSpawn()).Count())];
 			randomizedCell.hasWell = true;
 			Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
+		}
+	}
+
+	private void TunnelSpawn()
+	{
+		List<Cell> availableCells = cellList.Where(x => x.CanTunnelSpawn()).ToList();
+		Debug.Log($"AvailableCells for Tunnel Spawn: {availableCells.Count()}");
+		for (int i = 0; i < TunnelCount; i++)
+		{
+			Cell selectedCell = availableCells[Random.Range(0, availableCells.Where(x => x.CanTunnelSpawn()).Count())];
+			selectedCell.SetTunnelCell();
 		}
 	}
 

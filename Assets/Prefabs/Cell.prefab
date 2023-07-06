@@ -671,7 +671,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5528088199753720273
 Transform:
   m_ObjectHideFlags: 0
@@ -1010,6 +1010,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c823116024b94942b7c64846453c395, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundSprite: {fileID: 5318733523582050381}
   doors:
   - {fileID: 1306254530786858023}
   - {fileID: 2653304569382711951}
@@ -1017,6 +1018,8 @@ MonoBehaviour:
   - {fileID: 8332694538944125957}
   fogOfWar: {fileID: 3075608571502891722}
   entityIcon: {fileID: 8703636414210472885}
+  defaultBackgroundSprite: {fileID: 21300000, guid: fac79d49e8bb97c448d1c0a198a7dd85, type: 3}
+  tunnelBackgroundSprite: {fileID: 21300000, guid: 077f9f5be9f0ea841959913e9d2e6899, type: 3}
   IconManager: {fileID: 0}
   canThreatsSpawn: 0
   generated: 0
@@ -1024,3 +1027,5 @@ MonoBehaviour:
   hasTeleporter: 0
   hasWell: 0
   isHidden: 1
+  isTunnel: 0
+  tunnelEntrancePathRef: 0
