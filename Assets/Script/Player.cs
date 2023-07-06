@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
 		if (!gridRef.GetPlayerCellRelative(Vector3.zero).IsPathAvailable(direction))
 			return;
 
-		Vector3 arrowPosition = transform.position + direction * gridRef.cellSize;
+		Vector3 arrowPosition = transform.position;
 		Arrow arrow = Instantiate(arrowPrefab, arrowPosition, Quaternion.identity);
 		//arrow.spriteRenderer.gameObject.transform.Rotate(0f, 0f, 90);
 		arrow.direction = direction;

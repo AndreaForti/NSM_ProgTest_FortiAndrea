@@ -143,7 +143,14 @@ public class Cell : MonoBehaviour
 		if (hasMonster)
 			grid.PlayerWin();
 		else if (isTunnel)
+		{
 			arrow.direction = GetTunnelExit(grid, arrow.direction * -1);
+			grid.UpdateArrowMove(arrow);
+		}
+
+
+		if (grid.GetPlayerCellRelative(Vector3.zero) == this)
+			Debug.Log("YOU KILLED YOURSELF -.-");
 	}
 
 	public Vector3 GetTunnelExit(Grid grid, Vector3 enteringFromDirection)

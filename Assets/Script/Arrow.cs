@@ -35,7 +35,6 @@ public class Arrow : MonoBehaviour
 		{
 			yield return new WaitForSeconds(1);
 			grid.UpdateArrowMove(this);
-
 		}
 	}
 
