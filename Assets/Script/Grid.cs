@@ -27,6 +27,7 @@ public class Grid : MonoBehaviour
 	[SerializeField] private Cell cellPrefab;
 	[SerializeField] private Player player;
 	[SerializeField] private Camera gameCamera;
+	[SerializeField] private LoadingMenu LoadingMenu;
 
 	private int generationDepth = 0;
 	private Cell[,] cells;
@@ -42,32 +43,14 @@ public class Grid : MonoBehaviour
 
 	public void ResetGame()
 	{
+		LoadingMenu.ResetLoading();
 		WorldGen();
 		PlayerSpawn();
 	}
 
 	void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.W))
-			MovePlayer(Vector3.up);
-		if (Input.GetKeyDown(KeyCode.S))
-			MovePlayer(Vector3.down);
-		if (Input.GetKeyDown(KeyCode.D))
-			MovePlayer(Vector3.right);
-		if (Input.GetKeyDown(KeyCode.A))
-			MovePlayer(Vector3.left);
 
-		if (Input.GetKeyDown(KeyCode.R))
-			ResetGame();
-
-		if (Input.GetKeyDown(KeyCode.I))
-			player.Shoot(Vector3.up, this);
-		if (Input.GetKeyDown(KeyCode.J))
-			player.Shoot(Vector3.left, this);
-		if (Input.GetKeyDown(KeyCode.K))
-			player.Shoot(Vector3.down, this);
-		if (Input.GetKeyDown(KeyCode.L))
-			player.Shoot(Vector3.right, this);
 	}
 
 	#region PLAYER
@@ -241,13 +224,7 @@ public class Grid : MonoBehaviour
 	public void WorldGen()
 	{
 		WorldCellsInGridInstantiate();
-		WorldCellsPathingCreation();
-		MonsterSpawn();
-		TeleporterSpawn();
-		WellSpawn();
-		TunnelSpawn();
-
-		UpdateGUI();
+		RunWorldGenerationCoroutine();
 	}
 
 	public void WorldCellsInGridInstantiate()
@@ -266,6 +243,7 @@ public class Grid : MonoBehaviour
 				Cell tempCell = Instantiate(cellPrefab, GridCoordinatesToWorldPos(new Vector3(row, column)), Quaternion.identity, transform);
 				tempCell.gameObject.transform.localScale = new Vector3(cellSize, cellSize, 1);
 				tempCell.SetGridPosition(row, column);
+				tempCell.gameObject.name = $"Cell_{row}_{column}";
 				cells[row, column] = tempCell;
 			}
 		}
@@ -283,57 +261,87 @@ public class Grid : MonoBehaviour
 		player.transform.localScale = new Vector3(cellSize, cellSize, player.transform.localScale.z);
 		GetPlayerCurrentCell().HideFogOfWar();
 	}
-	private void WorldCellsPathingCreation()
+
+	public Stack<Cell> cellsStack = new Stack<Cell>();
+	public int generatedCells;
+
+	public void RunWorldGenerationCoroutine()
 	{
-		RecoursiveWorldCellsPathingCreation(cells[10, 10]);
-		Debug.Log($"UnGeneratedCells: {cellList.Where(x => !x.generated).Count()}");
+		generatedCells = 0;
+		Cell returningCell = RecoursiveWorldCellsPathingCreation(cells[10, 10]);
+		cellsStack.Push(returningCell);
+
+		StartCoroutine(WorldGenerationCoroutine());
 	}
 
-	private bool RecoursiveWorldCellsPathingCreation(Cell currentCell)
+	IEnumerator WorldGenerationCoroutine()
+	{
+		while (cellsStack.Count() > 0)
+		{
+			LoadingMenu.UpdateLoadingPercentage((float)generatedCells * 100 / (gridSize * gridSize));
+			RunNextCell();
+			yield return new WaitForSeconds(0);
+		}
+		Debug.Log($"GENERATION COMPLETED: {generatedCells}/{cellList.Where(x => x.generated).Count()}");
+
+		MonsterSpawn();
+		TeleporterSpawn();
+		WellSpawn();
+		TunnelSpawn();
+		UpdateGUI();
+	}
+
+	public void RunNextCell()
+	{
+		Cell currentCell = cellsStack.Pop();
+		Cell NextCell = RecoursiveWorldCellsPathingCreation(currentCell);
+		if (NextCell != null)
+		{
+			//generatedCells++;
+			cellsStack.Push(currentCell);
+			cellsStack.Push(NextCell);
+		}
+	}
+
+	private Cell RecoursiveWorldCellsPathingCreation(Cell currentCell)
 	{
 		Debug.Log($"[{generationDepth}] Start recoursiveWorldGen {currentCell.GetGridPosition()}");
 		List<Cell> adiacentCells = GetAdiacentCells(currentCell);
 		Debug.Log($"[{generationDepth}] adiacentCells count: {adiacentCells.Count}");
 
-
-		Cell nextCell = CellSpawn(currentCell);
+		Cell nextCell = SpawnNewCell(currentCell);
 		generationDepth++;
 
-		if (nextCell == null)
-			return false;
-		else
-		{
-			bool result = RecoursiveWorldCellsPathingCreation(nextCell);
-			if (!result)
-			{
-				return RecoursiveWorldCellsPathingCreation(currentCell);
-			}
-			return result;
-		}
+		return nextCell;
 	}
-	private Cell CellSpawn(Cell cell)
+	private Cell SpawnNewCell(Cell lastGeneratedCell)
 	{
 		Cell selectedRandomUngeneratedAdiancentCell = null;
-		List<Cell> adiacentCells = GetAdiacentCells(cell);
+		List<Cell> adiacentCells = GetAdiacentCells(lastGeneratedCell);
 		List<Cell> ungeneratedAdiacentCells = adiacentCells.Where(x => !x.generated).ToList();
+
+		//pick random ungenerated adiacent cell and open path with lastGeneratedCell
 		if (ungeneratedAdiacentCells.Count > 0)
 		{
 			selectedRandomUngeneratedAdiancentCell = ungeneratedAdiacentCells[Random.Range(0, ungeneratedAdiacentCells.Count)];
-			Vector3 direction = GetRelativePositionBetweenCells(selectedRandomUngeneratedAdiancentCell, cell);
+			Vector3 direction = GetRelativePositionBetweenCells(selectedRandomUngeneratedAdiancentCell, lastGeneratedCell);
 			selectedRandomUngeneratedAdiancentCell.SetPath(direction, 1);
-			cell.SetPath(direction * -1, 1);
-			Debug.Log($"[{generationDepth}] Opened new Path between cells {cell.GetGridPosition()} | {selectedRandomUngeneratedAdiancentCell.GetGridPosition()}");
+			lastGeneratedCell.SetPath(direction * -1, 1);
+			Debug.Log($"[{generationDepth}] Opened new Path between cells {lastGeneratedCell.GetGridPosition()} | {selectedRandomUngeneratedAdiancentCell.GetGridPosition()}");
 
-			//spawn extra path in cell
+			selectedRandomUngeneratedAdiancentCell.generated = true;
+			generatedCells++;
+
+			//spawn extra path in cell to another random adiacent cell, doesnt't count in generation
 			if (Random.Range(0f, 1f) <= extraPathInCellChance)
 			{
-				Cell selectedRandomAdiancentCell = adiacentCells[Random.Range(0, adiacentCells.Count)];
-				Vector3 direction2 = GetRelativePositionBetweenCells(selectedRandomAdiancentCell, cell);
-				selectedRandomAdiancentCell.SetPath(direction2, 1);
-				cell.SetPath(direction2 * -1, 1);
+				Cell selectedRandomExtraAdiancentCell = adiacentCells[Random.Range(0, adiacentCells.Count)];
+				Vector3 direction2 = GetRelativePositionBetweenCells(selectedRandomExtraAdiancentCell, lastGeneratedCell);
+				selectedRandomExtraAdiancentCell.SetPath(direction2, 1);
+				lastGeneratedCell.SetPath(direction2 * -1, 1);
 			}
 		}
-		cell.generated = true;
+
 		return selectedRandomUngeneratedAdiancentCell;
 	}
 
@@ -343,7 +351,7 @@ public class Grid : MonoBehaviour
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanMonsterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanMonsterSpawn()).Count())];
 			randomizedCell.hasMonster = true;
-			Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
+			//Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
 		}
 	}
 
@@ -353,7 +361,7 @@ public class Grid : MonoBehaviour
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanTeleporterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanTeleporterSpawn()).Count())];
 			randomizedCell.hasTeleporter = true;
-			Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
+			//Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
 		}
 	}
 	private void WellSpawn()
@@ -362,14 +370,14 @@ public class Grid : MonoBehaviour
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanWellSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanWellSpawn()).Count())];
 			randomizedCell.hasWell = true;
-			Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
+			//Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
 		}
 	}
 
 	private void TunnelSpawn()
 	{
 		List<Cell> availableCells = cellList.Where(x => x.CanTunnelSpawn()).ToList();
-		Debug.Log($"AvailableCells for Tunnel Spawn: {availableCells.Count()}");
+		//Debug.Log($"AvailableCells for Tunnel Spawn: {availableCells.Count()}");
 		for (int i = 0; i < tunnelSpawnCount; i++)
 		{
 			Cell selectedCell = availableCells[Random.Range(0, availableCells.Where(x => x.CanTunnelSpawn()).Count())];

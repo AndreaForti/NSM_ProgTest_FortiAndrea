@@ -183,4 +183,14 @@ public class Cell : MonoBehaviour
 		Vector3 direction = Grid.AdiacentPositions[tunnelEntrancePathRef];
 		backgroundSprite.transform.rotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, direction, Vector3.forward));
 	}
+
+	//private void OnDrawGizmos()
+	//{
+	//	if (!generated)
+	//	{
+	//		Gizmos.color = Color.magenta;
+	//		Gizmos.DrawCube(transform.position, new Vector3(20, 20));
+	//		Debug.Log($"UNGENERATED: {gridPosition}");
+	//	}
+	//}
 }
