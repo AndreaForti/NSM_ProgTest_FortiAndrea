@@ -3,23 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Transactions;
 using Unity.VisualScripting;
+using UnityEditor.Tilemaps;
 using UnityEngine;
 using static IconManager;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 public class Grid : MonoBehaviour
 {
-	[Header("Grid Data")]
+	[Header("Grid Configuration")]
 	[SerializeField] private int gridSize;
 	[SerializeField] public int cellSize;
+	[SerializeField] private Vector3 spawnPointGrid;
 
 	[Header("World Gen Values")]
 	[Range(0f, 1f)]
-	[SerializeField] private float ExtraPathInCellChance;
-	[SerializeField] public Vector3 spawnPointGrid;
-	[SerializeField] private int MonstersCount;
-	[SerializeField] private int TeleporterCount;
-	[SerializeField] private int WellCount;
-	[SerializeField] private int TunnelCount;
+	[SerializeField] private float extraPathInCellChance;
+	[SerializeField] private int monsterSpawnCount;
+	[SerializeField] private int teleporterSpawnCount;
+	[SerializeField] private int wellSpawnCount;
+	[SerializeField] private int tunnelSpawnCount;
 
 	[Header("References")]
 	[SerializeField] private Cell cellPrefab;
@@ -27,10 +29,10 @@ public class Grid : MonoBehaviour
 	[SerializeField] private Camera gameCamera;
 
 	private int generationDepth = 0;
-	public static List<Vector3> AdiacentPositions = new List<Vector3>() { Vector3.up, Vector3.right, Vector3.down, Vector3.left };
 	private Cell[,] cells;
 	private List<Cell> cellList;
 
+	public static List<Vector3> AdiacentPositions = new List<Vector3>() { Vector3.up, Vector3.right, Vector3.down, Vector3.left };
 
 	private void Start()
 	{
@@ -74,50 +76,50 @@ public class Grid : MonoBehaviour
 		if (CheckValidPlayerMovement(direction))
 		{
 			player.transform.position += direction * cellSize;
-			Cell destinationCell = GetPlayerCellRelative(Vector3.zero);
+			Cell destinationCell = GetPlayerCurrentCell();
 			SetPlayerPositionToCell(destinationCell, direction * -1);
 		}
 	}
 
 	public bool CheckValidPlayerMovement(Vector3 direction)
 	{
-		Vector3 testingNewPosition = player.transform.position + direction * cellSize;
-
-		//out of grid check
-		if (Mathf.Abs(testingNewPosition.x) > gridSize * cellSize / 2 || Mathf.Abs(testingNewPosition.y) > gridSize * cellSize / 2)
+		Vector3 testingNewGridCoordinate = GetCellGridCoordinatesFromWorldPos(player.transform.position + direction * cellSize);
+		if (!IsGridCoordinateInsideGrid(testingNewGridCoordinate))
 			return false;
 
-		if (!GetPlayerCellRelative(Vector3.zero).IsPathAvailable(direction))
+		if (!GetPlayerCurrentCell().IsPathAvailable(direction))
 			return false;
 
 		return true;
 	}
 
-	public Cell GetPlayerCellRelative(Vector3 relative)
+	/// <summary>
+	/// Returns the Cell next to the player in the chosen direction
+	/// </summary>
+	/// <param name="relativePosition">Normalized Vector indicating the direction to pick the Cell from (player position is the origin).</param>
+	/// <returns></returns>
+	public Cell GetPlayerAdiacentCell(Vector3 relativePosition)
 	{
-		Vector2Int cellGridPos = GetCellGridPositionFromWorldPos(player.transform.position + relative * cellSize);
-		//int x = (((int)player.transform.position.x / cellSize) + gridSize / 2) + (int)relative.x;
-		//int y = (((int)player.transform.position.y / cellSize) + gridSize / 2) + (int)relative.y;
+		Vector3 cellGridPos = GetCellFromWorldPosition(player.transform.position + relativePosition * cellSize).GetGridPosition();
 
 		if (Mathf.Abs(cellGridPos.x) >= gridSize || Mathf.Abs(cellGridPos.y) >= gridSize)
 			return null;
-		return cells[cellGridPos.x, cellGridPos.y];
+		return GetCellFromGridPosition(cellGridPos);
 	}
 
-	public Cell getCellFromWorldPosition(Vector3 position)
+	public Cell GetPlayerCurrentCell()
 	{
-		Vector2Int cellGridPos = GetCellGridPositionFromWorldPos(position);
-		return cells[cellGridPos.x, cellGridPos.y];
+		return GetPlayerAdiacentCell(Vector3.zero);
 	}
 
-	public Vector2Int GetCellGridPositionFromWorldPos(Vector3 position)
-	{
-		return new Vector2Int((int)((position.x / cellSize) + gridSize / 2), (int)((position.y / cellSize) + gridSize / 2));
-	}
 
+	/// <summary>
+	/// Set the Player position to a new random available safe location.
+	/// </summary>
 	public void TeleportPlayer()
 	{
-		Cell randomizedCell = cellList.Where(x => x.IsCellSafeFromThreats() && !x.isTunnel).ToList()[Random.Range(0, cellList.Where(x => x.IsCellSafeFromThreats()).Count())];
+		List<Cell> availableCells = cellList.Where(x => x.IsCellSafeFromThreats() && !x.isTunnel).ToList();
+		Cell randomizedCell = availableCells[Random.Range(0, availableCells.Count())];
 		SetPlayerPositionToCell(randomizedCell, Vector3.zero);
 	}
 
@@ -130,9 +132,16 @@ public class Grid : MonoBehaviour
 	{
 		Debug.Log("YOU WIN");
 	}
+
+
+	/// <summary>
+	/// Set the Player position to a specific Cell
+	/// </summary>
+	/// <param name="cell">Destination Cell</param>
+	/// <param name="enteringFromDirection">Direction which the player is entering the new Cell from</param>
 	public void SetPlayerPositionToCell(Cell cell, Vector3 enteringFromDirection)
 	{
-		player.transform.position = new Vector3(cell.transform.position.x, cell.transform.position.y, player.transform.position.z);
+		player.transform.position = cell.transform.position;
 		cell.HideFogOfWar();
 		cell.OnPlayerEnter(this, enteringFromDirection);
 	}
@@ -140,15 +149,58 @@ public class Grid : MonoBehaviour
 
 	#region ACCESS DATA
 
+
+	/// <summary>
+	/// Centralized function to get data from Cell matrix converting Vector3 to Vector3Int
+	/// </summary>
+	/// <param name="GridPosition"></param>
+	/// <returns></returns>
+	public Cell GetCellFromGridPosition(Vector3 GridPosition)
+	{
+		Vector3Int convertedGridPosition = Vector3Int.FloorToInt(GridPosition);
+		return cells[convertedGridPosition.x, convertedGridPosition.y];
+	}
+
+	/// <summary>
+	/// Convert a World Position to the corresponding Cell inside the grid.
+	/// </summary>
+	/// <param name="position">Position in World</param>
+	/// <returns>Cell inside the grid</returns>
+	public Cell GetCellFromWorldPosition(Vector3 position)
+	{
+		Vector3 cellGridPos = GetCellGridCoordinatesFromWorldPos(position);
+		return GetCellFromGridPosition(cellGridPos);
+	}
+
+	/// <summary>
+	/// Convert a World Position to the corresponding Coordinates inside the grid.
+	/// </summary>
+	/// <param name="position">Position in World Space</param>
+	/// <returns>Cell coordinates inside the grid</returns>
+	public Vector3 GetCellGridCoordinatesFromWorldPos(Vector3 position)
+	{
+		return new Vector3((int)((position.x / cellSize) + gridSize / 2), (int)((position.y / cellSize) + gridSize / 2));
+	}
+
+	/// <summary>
+	/// Returns the Cell next to the chosen Cell in the chosen Direction.
+	/// </summary>
+	/// <param name="currentCell">Reference Cell</param
+	/// <param name="relative">Normalized Vector indicating the direction to pick the Cell from (player position is the origin)</param>
+	/// <returns></returns>
 	public Cell GetAdiancentCell(Cell currentCell, Vector3 relative)
 	{
 		Vector3 adiacentCellPosition = currentCell.GetGridPosition() + relative;
 		if (adiacentCellPosition.x < 0 || adiacentCellPosition.x >= gridSize || adiacentCellPosition.y >= gridSize || adiacentCellPosition.y < 0)
 			return null;
-		//Debug.Log($"GetAdiancentCell: {(int)adiacentCellPosition.x} | {(int)adiacentCellPosition.y}");
 		return cells[(int)adiacentCellPosition.x, (int)adiacentCellPosition.y];
 	}
 
+	/// <summary>
+	/// Returns all the Cell next to the chosen Cell, no pathing is calculated in this operation
+	/// </summary>
+	/// <param name="currentCell">Reference Cell</param>
+	/// <returns></returns>
 	public List<Cell> GetAdiacentCells(Cell currentCell)
 	{
 		List<Cell> cells = new List<Cell>();
@@ -162,10 +214,27 @@ public class Grid : MonoBehaviour
 		return cells;
 	}
 
+	/// <summary>
+	///  Returns the direction required to move from origin Cell to destination Cell
+	/// </summary>
+	/// <param name="origin">Cell to move from</param>
+	/// <param name="destination">Cell to move to</param>
+	/// <returns></returns>
 	private Vector3 GetRelativePositionBetweenCells(Cell origin, Cell destination)
 	{
 		return destination.GetGridPosition() - origin.GetGridPosition();
 	}
+
+	public bool IsGridCoordinateInsideGrid(Vector3 gridCoordinate)
+	{
+		return gridCoordinate.x >= 0 && gridCoordinate.x < gridSize && gridCoordinate.y >= 0 && gridCoordinate.y < gridSize;
+	}
+
+	public Vector3 GridCoordinatesToWorldPos(Vector3 gridCoordinate)
+	{
+		return transform.position + new Vector3(gridCoordinate.x - gridSize / 2, gridCoordinate.y - gridSize / 2, 0f) * cellSize;
+	}
+
 	#endregion
 
 	#region WORLDGEN
@@ -194,7 +263,7 @@ public class Grid : MonoBehaviour
 		{
 			for (int column = 0; column < gridSize; column++)
 			{
-				Cell tempCell = Instantiate(cellPrefab, transform.position + new Vector3(row - gridSize / 2, column - gridSize / 2, 0f) * cellSize, Quaternion.identity, transform);
+				Cell tempCell = Instantiate(cellPrefab, GridCoordinatesToWorldPos(new Vector3(row, column)), Quaternion.identity, transform);
 				tempCell.gameObject.transform.localScale = new Vector3(cellSize, cellSize, 1);
 				tempCell.SetGridPosition(row, column);
 				cells[row, column] = tempCell;
@@ -209,10 +278,10 @@ public class Grid : MonoBehaviour
 
 	public void PlayerSpawn()
 	{
-		Vector3 cellPosition = cells[(int)spawnPointGrid.x, (int)spawnPointGrid.y].transform.position;
+		Vector3 cellPosition = GetCellFromGridPosition(spawnPointGrid).transform.position;
 		player.transform.position = cellPosition;
 		player.transform.localScale = new Vector3(cellSize, cellSize, player.transform.localScale.z);
-		GetPlayerCellRelative(Vector3.zero).HideFogOfWar();
+		GetPlayerCurrentCell().HideFogOfWar();
 	}
 	private void WorldCellsPathingCreation()
 	{
@@ -256,7 +325,7 @@ public class Grid : MonoBehaviour
 			Debug.Log($"[{generationDepth}] Opened new Path between cells {cell.GetGridPosition()} | {selectedRandomUngeneratedAdiancentCell.GetGridPosition()}");
 
 			//spawn extra path in cell
-			if (Random.Range(0f, 1f) <= ExtraPathInCellChance)
+			if (Random.Range(0f, 1f) <= extraPathInCellChance)
 			{
 				Cell selectedRandomAdiancentCell = adiacentCells[Random.Range(0, adiacentCells.Count)];
 				Vector3 direction2 = GetRelativePositionBetweenCells(selectedRandomAdiancentCell, cell);
@@ -270,7 +339,7 @@ public class Grid : MonoBehaviour
 
 	private void MonsterSpawn()
 	{
-		for (int i = 0; i < MonstersCount; i++)
+		for (int i = 0; i < monsterSpawnCount; i++)
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanMonsterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanMonsterSpawn()).Count())];
 			randomizedCell.hasMonster = true;
@@ -280,7 +349,7 @@ public class Grid : MonoBehaviour
 
 	private void TeleporterSpawn()
 	{
-		for (int i = 0; i < TeleporterCount; i++)
+		for (int i = 0; i < teleporterSpawnCount; i++)
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanTeleporterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanTeleporterSpawn()).Count())];
 			randomizedCell.hasTeleporter = true;
@@ -289,7 +358,7 @@ public class Grid : MonoBehaviour
 	}
 	private void WellSpawn()
 	{
-		for (int i = 0; i < WellCount; i++)
+		for (int i = 0; i < wellSpawnCount; i++)
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanWellSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanWellSpawn()).Count())];
 			randomizedCell.hasWell = true;
@@ -301,7 +370,7 @@ public class Grid : MonoBehaviour
 	{
 		List<Cell> availableCells = cellList.Where(x => x.CanTunnelSpawn()).ToList();
 		Debug.Log($"AvailableCells for Tunnel Spawn: {availableCells.Count()}");
-		for (int i = 0; i < TunnelCount; i++)
+		for (int i = 0; i < tunnelSpawnCount; i++)
 		{
 			Cell selectedCell = availableCells[Random.Range(0, availableCells.Where(x => x.CanTunnelSpawn()).Count())];
 			selectedCell.SetTunnelCell();
@@ -339,7 +408,7 @@ public class Grid : MonoBehaviour
 
 	public void UpdateArrowMove(Arrow arrow)
 	{
-		Cell currentArrowCell = getCellFromWorldPosition(arrow.transform.position);
+		Cell currentArrowCell = GetCellFromWorldPosition(arrow.transform.position);
 
 		if (currentArrowCell.IsPathAvailable(arrow.direction))
 		{
@@ -366,10 +435,11 @@ public class Grid : MonoBehaviour
 	private void OnDrawGizmos()
 	{
 		Gizmos.color = Color.magenta;
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2 * cellSize, transform.position + (Vector3.right + Vector3.down) * gridSize / 2 * cellSize);
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.up) * gridSize / 2 * cellSize, transform.position + (Vector3.right + Vector3.up) * gridSize / 2 * cellSize);
-		Gizmos.DrawLine(transform.position + (Vector3.left + Vector3.down) * gridSize / 2 * cellSize, transform.position + (Vector3.left + Vector3.up) * gridSize / 2 * cellSize);
-		Gizmos.DrawLine(transform.position + (Vector3.right + Vector3.down) * gridSize / 2 * cellSize, transform.position + (Vector3.right + Vector3.up) * gridSize / 2 * cellSize);
 
+		Gizmos.DrawLine(GridCoordinatesToWorldPos(new Vector3(0, 0, 0)), GridCoordinatesToWorldPos(new Vector3(0, gridSize - 1, 0)));
+		Gizmos.DrawLine(GridCoordinatesToWorldPos(new Vector3(0, 0, 0)), GridCoordinatesToWorldPos(new Vector3(gridSize - 1, 0, 0)));
+
+		Gizmos.DrawLine(GridCoordinatesToWorldPos(new Vector3(gridSize - 1, gridSize - 1, 0)), GridCoordinatesToWorldPos(new Vector3(0, gridSize - 1, 0)));
+		Gizmos.DrawLine(GridCoordinatesToWorldPos(new Vector3(gridSize - 1, gridSize - 1, 0)), GridCoordinatesToWorldPos(new Vector3(gridSize - 1, 0, 0)));
 	}
 }

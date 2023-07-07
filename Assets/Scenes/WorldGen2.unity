@@ -271,12 +271,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridSize: 20
   cellSize: 20
-  ExtraPathInCellChance: 0.35
   spawnPointGrid: {x: 10, y: 10, z: 0}
-  MonstersCount: 1
-  TeleporterCount: 8
-  WellCount: 6
-  TunnelCount: 50
+  extraPathInCellChance: 0
+  monsterSpawnCount: 1
+  teleporterSpawnCount: 10
+  wellSpawnCount: 10
+  tunnelSpawnCount: 50
   cellPrefab: {fileID: 2833113274369744467, guid: 09111f4484400c642abe55d30ba6528c, type: 3}
   player: {fileID: 1225046701}
   gameCamera: {fileID: 1793366926}

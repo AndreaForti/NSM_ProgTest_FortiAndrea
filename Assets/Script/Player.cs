@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
 	{
 		if (arrowCount <= 0)
 			return;
-		if (!gridRef.GetPlayerCellRelative(Vector3.zero).IsPathAvailable(direction))
+		if (!gridRef.GetPlayerCurrentCell().IsPathAvailable(direction))
 			return;
 
 		Vector3 arrowPosition = transform.position;

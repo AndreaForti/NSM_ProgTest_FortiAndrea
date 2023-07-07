@@ -149,7 +149,7 @@ public class Cell : MonoBehaviour
 		}
 
 
-		if (grid.GetPlayerCellRelative(Vector3.zero) == this)
+		if (grid.GetPlayerCurrentCell() == this)
 			Debug.Log("YOU KILLED YOURSELF -.-");
 	}
 

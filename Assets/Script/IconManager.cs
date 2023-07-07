@@ -5,7 +5,7 @@ using System.Linq;
 
 public class IconManager : MonoBehaviour
 {
-	[SerializeField] private SpriteRenderer[] IconSlots = new SpriteRenderer[3];
+	[SerializeField] private List<SpriteRenderer> IconSlots = new List<SpriteRenderer>();
 
 	[Header("Icons")]
 	[SerializeField] private Sprite MonsterSprite;
@@ -35,7 +35,7 @@ public class IconManager : MonoBehaviour
 	public void Clear()
 	{
 		iconPointer = 0;
-		IconSlots.ToList().ForEach(x => x.gameObject.SetActive(false));
+		IconSlots.ForEach(x => x.gameObject.SetActive(false));
 	}
 
 	public enum IconType

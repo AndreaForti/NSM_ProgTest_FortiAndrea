@@ -20,7 +20,7 @@ public class Arrow : MonoBehaviour
 	private void Start()
 	{
 		spriteRenderer.transform.localScale *= grid.cellSize;
-		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, direction, Vector3.forward));
+		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, new Vector3(direction.x, direction.y), Vector3.forward));
 		StartPositinUpdateCoroutine();
 	}
 
@@ -40,8 +40,8 @@ public class Arrow : MonoBehaviour
 
 	public void ApplyMovement()
 	{
-		transform.position += direction * grid.cellSize;
-		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, direction, Vector3.forward));
+		transform.position += new Vector3(direction.x, direction.y) * grid.cellSize;
+		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, new Vector3(direction.x, direction.y), Vector3.forward));
 	}
 
 	public void DestroyArrow()
