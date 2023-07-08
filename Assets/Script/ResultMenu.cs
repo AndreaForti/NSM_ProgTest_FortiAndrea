@@ -14,6 +14,7 @@ public class ResultMenu : MonoBehaviour
 	[SerializeField] private string DescriptionTextMonsterString;
 	[SerializeField] private string DescriptionTextWellString;
 	[SerializeField] private string DescriptionTextPlayerString;
+	[SerializeField] private string DescriptionTextAmmoString;
 	[SerializeField] private string DescriptionTextPlayerWinString;
 
 	private Transform container;
@@ -48,14 +49,21 @@ public class ResultMenu : MonoBehaviour
 			case ResultType.DeathByplayer:
 				DescriptionText.text = DescriptionTextPlayerString;
 				break;
+			case ResultType.OutOfAmmo:
+				DescriptionText.text = DescriptionTextAmmoString;
+				break;
 			case ResultType.Win:
 				DescriptionText.text = DescriptionTextPlayerWinString;
 				MainText.text = MainTextWinString;
 				MainText.color = Color.green;
 				break;
+
 		}
 	}
 
+	/// <summary>
+	/// Start new Game, used by GUI Button
+	/// </summary>
 	public void NewGame()
 	{
 		GameManager.Instance.RestartGame();

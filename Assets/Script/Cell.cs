@@ -33,7 +33,7 @@ public class Cell : MonoBehaviour
 
 	public bool CanTunnelSpawn()
 	{
-		return IsCellSafeFromThreats() && IsAnglePath() && !canThreatsSpawn;
+		return IsCellSafeFromThreats() && HasAnglePath() && !canThreatsSpawn;
 	}
 
 	private void Awake()
@@ -55,7 +55,7 @@ public class Cell : MonoBehaviour
 		UpdateDoors();
 	}
 
-	public bool IsStraightPath()
+	public bool HasStraightPath()
 	{
 		if (GetEntranceCount() != 2)
 			return false;
@@ -63,11 +63,11 @@ public class Cell : MonoBehaviour
 			return true;
 		return false;
 	}
-	public bool IsAnglePath()
+	public bool HasAnglePath()
 	{
 		if (GetEntranceCount() != 2)
 			return false;
-		return !IsStraightPath();
+		return !HasStraightPath();
 	}
 	public int GetEntranceCount()
 	{
@@ -113,7 +113,7 @@ public class Cell : MonoBehaviour
 	{
 		return gridPosition;
 	}
-	public void SetEntity(Color color)
+	public void SetEntityGUI(Color color)
 	{
 		entityIcon.color = color;
 		entityIcon.gameObject.SetActive(true);
@@ -144,7 +144,7 @@ public class Cell : MonoBehaviour
 			GameManager.Instance.player.EndPlayerGame(Player.ResultType.Win);
 		else if (isTunnel)
 		{
-			arrow.direction = GetTunnelExit(arrow.direction * -1);
+			arrow.Direction = GetTunnelExit(arrow.Direction * -1);
 			GameManager.Instance.grid.UpdateArrowMove(arrow);
 		}
 

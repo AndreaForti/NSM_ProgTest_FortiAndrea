@@ -643,6 +643,7 @@ MonoBehaviour:
   DescriptionTextWellString: You fell into a well... watch your steps next time!
   DescriptionTextPlayerString: You took an arrow in the knee... but the arrow was
     yours...
+  DescriptionTextAmmoString: You are out of arrow and the monster is still alive
   DescriptionTextPlayerWinString: You killed the monster
 --- !u!1 &3559080904521801246
 GameObject:

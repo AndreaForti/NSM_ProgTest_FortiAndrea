@@ -165,7 +165,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowPrefab: {fileID: 937954726681171421, guid: 8e35afe6db2d6af42b835aceec1d910b, type: 3}
+  arrowCountOnSpawn: 5
   ActiveMovement: 0
+  arrowCount: 0
+  flyingArrowCount: 0
 --- !u!1 &5790072680892058691
 GameObject:
   m_ObjectHideFlags: 0

@@ -26,11 +26,16 @@ public class Grid : MonoBehaviour
 	[Header("References")]
 	[SerializeField] private Cell cellPrefab;
 
-	private int generationDepth = 0;
 	private Cell[,] cells;
 	private List<Cell> cellList;
 
+	private Stack<Cell> cellsStack = new Stack<Cell>();
+	private int generatedCells;
+
+
 	public static List<Vector3> AdiacentPositions = new List<Vector3>() { Vector3.up, Vector3.right, Vector3.down, Vector3.left };
+
+
 
 	private void Start()
 	{
@@ -41,11 +46,6 @@ public class Grid : MonoBehaviour
 	{
 		WorldGen();
 		PlayerSpawn();
-	}
-
-	void Update()
-	{
-
 	}
 
 	#region PLAYER
@@ -72,10 +72,10 @@ public class Grid : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Returns the Cell next to the player in the chosen direction
+	/// Returns the Cell next to the player in the chosen direction.
 	/// </summary>
-	/// <param name="relativePosition">Normalized Vector indicating the direction to pick the Cell from (player position is the origin).</param>
-	/// <returns></returns>
+	/// <param name="relativePosition">Normalized Vector indicating the direction to pick the Cell from (player position is the origin)</param>
+	/// <returns>Cell next to the player in the chosen direction</returns>
 	public Cell GetPlayerAdiacentCell(Vector3 relativePosition)
 	{
 		Vector3 cellGridPos = GetCellFromWorldPosition(GameManager.Instance.player.transform.position + relativePosition * cellSize).GetGridPosition();
@@ -102,7 +102,7 @@ public class Grid : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Set the Player position to a specific Cell
+	/// Set the Player position to a specific Cell.
 	/// </summary>
 	/// <param name="cell">Destination Cell</param>
 	/// <param name="enteringFromDirection">Direction which the player is entering the new Cell from</param>
@@ -118,14 +118,18 @@ public class Grid : MonoBehaviour
 
 
 	/// <summary>
-	/// Centralized function to get data from Cell matrix converting Vector3 to Vector3Int
+	/// Centralized function to get data from Cell matrix converting Vector3 to Vector3Int.
 	/// </summary>
-	/// <param name="GridPosition"></param>
-	/// <returns></returns>
-	public Cell GetCellFromGridPosition(Vector3 GridPosition)
+	/// <param name="GridCoordinates">Coordinates for the cell inside the grid matrix</param>
+	/// <returns>Selected Cell</returns>
+	public Cell GetCellFromGridPosition(Vector3 GridCoordinates)
 	{
-		Vector3Int convertedGridPosition = Vector3Int.FloorToInt(GridPosition);
-		return cells[convertedGridPosition.x, convertedGridPosition.y];
+		if (IsGridCoordinateInsideGrid(GridCoordinates))
+		{
+			Vector3Int convertedGridPosition = Vector3Int.FloorToInt(GridCoordinates);
+			return cells[convertedGridPosition.x, convertedGridPosition.y];
+		}
+		return null;
 	}
 
 	/// <summary>
@@ -154,7 +158,7 @@ public class Grid : MonoBehaviour
 	/// </summary>
 	/// <param name="currentCell">Reference Cell</param
 	/// <param name="relative">Normalized Vector indicating the direction to pick the Cell from (player position is the origin)</param>
-	/// <returns></returns>
+	/// <returns>Cell next to the chosen Cell in the chosen Direction</returns>
 	public Cell GetAdiancentCell(Cell currentCell, Vector3 relative)
 	{
 		Vector3 adiacentCellPosition = currentCell.GetGridPosition() + relative;
@@ -164,10 +168,10 @@ public class Grid : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Returns all the Cell next to the chosen Cell, no pathing is calculated in this operation
+	/// Returns all the Cells next to the chosen Cell, no pathing is calculated in this operation.
 	/// </summary>
 	/// <param name="currentCell">Reference Cell</param>
-	/// <returns></returns>
+	/// <returns>Cells next to the chosen Cell</returns>
 	public List<Cell> GetAdiacentCells(Cell currentCell)
 	{
 		List<Cell> cells = new List<Cell>();
@@ -182,11 +186,11 @@ public class Grid : MonoBehaviour
 	}
 
 	/// <summary>
-	///  Returns the direction required to move from origin Cell to destination Cell
+	///  Returns the direction required to move from origin Cell to destination Cell.
 	/// </summary>
 	/// <param name="origin">Cell to move from</param>
 	/// <param name="destination">Cell to move to</param>
-	/// <returns></returns>
+	/// <returns>Direction required to move from origin Cell to destination Cell</returns>
 	private Vector3 GetRelativePositionBetweenCells(Cell origin, Cell destination)
 	{
 		return destination.GetGridPosition() - origin.GetGridPosition();
@@ -246,8 +250,7 @@ public class Grid : MonoBehaviour
 		GetPlayerCurrentCell().HideFogOfWar();
 	}
 
-	public Stack<Cell> cellsStack = new Stack<Cell>();
-	public int generatedCells;
+	
 
 	public void RunWorldGenerationCoroutine()
 	{
@@ -289,13 +292,7 @@ public class Grid : MonoBehaviour
 
 	private Cell RecoursiveWorldCellsPathingCreation(Cell currentCell)
 	{
-		Debug.Log($"[{generationDepth}] Start recoursiveWorldGen {currentCell.GetGridPosition()}");
-		List<Cell> adiacentCells = GetAdiacentCells(currentCell);
-		Debug.Log($"[{generationDepth}] adiacentCells count: {adiacentCells.Count}");
-
 		Cell nextCell = SpawnNewCell(currentCell);
-		generationDepth++;
-
 		return nextCell;
 	}
 	private Cell SpawnNewCell(Cell lastGeneratedCell)
@@ -311,7 +308,6 @@ public class Grid : MonoBehaviour
 			Vector3 direction = GetRelativePositionBetweenCells(selectedRandomUngeneratedAdiancentCell, lastGeneratedCell);
 			selectedRandomUngeneratedAdiancentCell.OpenPath(direction);
 			lastGeneratedCell.OpenPath(direction * -1);
-			Debug.Log($"[{generationDepth}] Opened new Path between cells {lastGeneratedCell.GetGridPosition()} | {selectedRandomUngeneratedAdiancentCell.GetGridPosition()}");
 
 			selectedRandomUngeneratedAdiancentCell.generated = true;
 			generatedCells++;
@@ -335,7 +331,6 @@ public class Grid : MonoBehaviour
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanMonsterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanMonsterSpawn()).Count())];
 			randomizedCell.hasMonster = true;
-			//Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
 		}
 	}
 
@@ -345,7 +340,6 @@ public class Grid : MonoBehaviour
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanTeleporterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanTeleporterSpawn()).Count())];
 			randomizedCell.hasTeleporter = true;
-			//Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
 		}
 	}
 	private void WellSpawn()
@@ -354,7 +348,6 @@ public class Grid : MonoBehaviour
 		{
 			Cell randomizedCell = cellList.Where(x => x.CanWellSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanWellSpawn()).Count())];
 			randomizedCell.hasWell = true;
-			//Debug.Log($"Monster spawned in {randomizedCell.GetGridPosition()}");
 		}
 	}
 
@@ -374,7 +367,7 @@ public class Grid : MonoBehaviour
 		cellList.ForEach(x => x.ClearEntyty());
 		foreach (Cell cell in cellList.Where(x => x.hasMonster).ToList())
 		{
-			cell.SetEntity(Color.red);
+			cell.SetEntityGUI(Color.red);
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Monster);
@@ -382,7 +375,7 @@ public class Grid : MonoBehaviour
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasTeleporter).ToList())
 		{
-			cell.SetEntity(Color.cyan);
+			cell.SetEntityGUI(Color.cyan);
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Telporter);
@@ -390,7 +383,7 @@ public class Grid : MonoBehaviour
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasWell).ToList())
 		{
-			cell.SetEntity(Color.green);
+			cell.SetEntityGUI(Color.green);
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Well);
@@ -402,9 +395,9 @@ public class Grid : MonoBehaviour
 	{
 		Cell currentArrowCell = GetCellFromWorldPosition(arrow.transform.position);
 
-		if (currentArrowCell.IsPathAvailable(arrow.direction))
+		if (currentArrowCell.IsPathAvailable(arrow.Direction))
 		{
-			Cell destinationArrowCell = GetAdiancentCell(currentArrowCell, arrow.direction);
+			Cell destinationArrowCell = GetAdiancentCell(currentArrowCell, arrow.Direction);
 			if (destinationArrowCell != null)
 				destinationArrowCell.OnArrowEnter(arrow);
 			else
@@ -416,6 +409,8 @@ public class Grid : MonoBehaviour
 
 	public void RepositionMonster()
 	{
+		if (GameManager.Instance.player.flyingArrowCount == 0 && GameManager.Instance.player.arrowCount == 0)
+			GameManager.Instance.player.EndPlayerGame(Player.ResultType.OutOfAmmo);
 		foreach (Cell monsterCell in cellList.Where(x => x.hasMonster).ToList())
 			monsterCell.hasMonster = false;
 		MonsterSpawn();

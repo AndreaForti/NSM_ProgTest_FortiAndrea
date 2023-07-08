@@ -8,9 +8,8 @@ using UnityEngine;
 
 public class Arrow : MonoBehaviour
 {
-	public Vector3 direction;
-	public SpriteRenderer spriteRenderer;
-
+	public Vector3 Direction;
+	private SpriteRenderer spriteRenderer;
 
 	private void Awake()
 	{
@@ -19,7 +18,7 @@ public class Arrow : MonoBehaviour
 	private void Start()
 	{
 		spriteRenderer.transform.localScale *= GameManager.Instance.grid.cellSize;
-		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, new Vector3(direction.x, direction.y), Vector3.forward));
+		AlignSpriteRotationToDirection();
 		StartPositinUpdateCoroutine();
 	}
 
@@ -39,12 +38,18 @@ public class Arrow : MonoBehaviour
 
 	public void ApplyMovement()
 	{
-		transform.position += new Vector3(direction.x, direction.y) * GameManager.Instance.grid.cellSize;
-		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, new Vector3(direction.x, direction.y), Vector3.forward));
+		transform.position += new Vector3(Direction.x, Direction.y) * GameManager.Instance.grid.cellSize;
+		AlignSpriteRotationToDirection();
+	}
+
+	private void AlignSpriteRotationToDirection()
+	{
+		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, new Vector3(Direction.x, Direction.y), Vector3.forward));
 	}
 
 	public void DestroyArrow()
 	{
+		GameManager.Instance.player.flyingArrowCount--;
 		GameManager.Instance.grid.RepositionMonster();
 		StopAllCoroutines();
 		Destroy(gameObject);

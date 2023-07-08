@@ -5,8 +5,10 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
 	[SerializeField] private Arrow arrowPrefab;
+	[SerializeField] private int arrowCountOnSpawn;
 	public bool ActiveMovement = false;
-	private int arrowCount = 5;
+	public int arrowCount;
+	public int flyingArrowCount = 0;
 	private Camera gameGamera;
 
 	public void Shoot(Vector3 direction)
@@ -19,18 +21,23 @@ public class Player : MonoBehaviour
 		Vector3 arrowPosition = transform.position;
 		Arrow arrow = Instantiate(arrowPrefab, arrowPosition, Quaternion.identity);
 		//arrow.spriteRenderer.gameObject.transform.Rotate(0f, 0f, 90);
-		arrow.direction = direction;
+		arrow.Direction = direction;
 		arrowCount--;
+		flyingArrowCount++;
 	}
 
 	private void Awake()
 	{
 		gameGamera = GetComponentInChildren<Camera>(true);
 		gameGamera.orthographicSize *= GameManager.Instance.grid.cellSize;
+		arrowCount = arrowCountOnSpawn;
 	}
+
 
 	private void Update()
 	{
+		//Player Input Handle
+
 		if (!ActiveMovement)
 			return;
 
@@ -42,9 +49,6 @@ public class Player : MonoBehaviour
 			GameManager.Instance.grid.MovePlayer(Vector3.right);
 		if (Input.GetKeyDown(KeyCode.A))
 			GameManager.Instance.grid.MovePlayer(Vector3.left);
-
-		if (Input.GetKeyDown(KeyCode.R))
-			GameManager.Instance.grid.ResetGame();
 
 		if (Input.GetKeyDown(KeyCode.I))
 			Shoot(Vector3.up);
@@ -67,6 +71,7 @@ public class Player : MonoBehaviour
 		DeathByMonster,
 		DeathByWell,
 		DeathByplayer,
-		Win
+		Win,
+		OutOfAmmo
 	}
 }

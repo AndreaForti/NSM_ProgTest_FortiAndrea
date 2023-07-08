@@ -37,7 +37,7 @@ public class LoadingMenu : MonoBehaviour
 			percentageText.text = $"{percentage.ToString("0.0")}%";
 		if (slider != null)
 			slider.value = percentage;
-		if (percentage == 100)
+		if (percentage >= 100)
 			StartCoroutine(CloseLoadingMenuCoroutine());
 	}
 
