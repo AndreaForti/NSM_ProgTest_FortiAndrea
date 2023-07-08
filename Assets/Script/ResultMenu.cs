@@ -55,4 +55,9 @@ public class ResultMenu : MonoBehaviour
 				break;
 		}
 	}
+
+	public void NewGame()
+	{
+		GameManager.Instance.RestartGame();
+	}
 }

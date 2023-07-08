@@ -9,6 +9,6 @@ public class MenuFunctions : MonoBehaviour
 	[SerializeField] private TextMeshProUGUI loading;
 	public void Play()
 	{
-		SceneManager.LoadScene("WorldGen2", LoadSceneMode.Single);
+		SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
 	}
 }
