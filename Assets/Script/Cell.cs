@@ -42,16 +42,16 @@ public class Cell : MonoBehaviour
 		backgroundSprite.sprite = defaultBackgroundSprite;
 	}
 
-	public void SetPath(Vector3 direction, int value)
+	public void OpenPath(Vector3 direction)
 	{
 		if (direction == Vector3.up)
-			paths[0] = value;
+			paths[0] = 1;
 		if (direction == Vector3.right)
-			paths[1] = value;
+			paths[1] = 1;
 		if (direction == Vector3.down)
-			paths[2] = value;
+			paths[2] = 1;
 		if (direction == Vector3.left)
-			paths[3] = value;
+			paths[3] = 1;
 		UpdateDoors();
 	}
 
@@ -183,14 +183,4 @@ public class Cell : MonoBehaviour
 		Vector3 direction = Grid.AdiacentPositions[tunnelEntrancePathRef];
 		backgroundSprite.transform.rotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, direction, Vector3.forward));
 	}
-
-	//private void OnDrawGizmos()
-	//{
-	//	if (!generated)
-	//	{
-	//		Gizmos.color = Color.magenta;
-	//		Gizmos.DrawCube(transform.position, new Vector3(20, 20));
-	//		Debug.Log($"UNGENERATED: {gridPosition}");
-	//	}
-	//}
 }
