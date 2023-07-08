@@ -14,7 +14,7 @@ public class Arrow : MonoBehaviour
 
 	private void Awake()
 	{
-		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+		spriteRenderer = GetComponentInChildren<SpriteRenderer>(true);
 	}
 	private void Start()
 	{

@@ -18,5 +18,13 @@ public class GameManager : MonoBehaviour
 	public Player player;
 	public Grid grid;
 	public LoadingMenu loadingMenu;
+	public ResultMenu resultMenu;
 
+
+	public void RestartGame()
+	{
+		loadingMenu.ResetLoading();
+		resultMenu.Clear();
+		grid.ResetGame();
+	}
 }

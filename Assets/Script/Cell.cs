@@ -38,7 +38,7 @@ public class Cell : MonoBehaviour
 
 	private void Awake()
 	{
-		IconManager = GetComponentInChildren<IconManager>();
+		IconManager = GetComponentInChildren<IconManager>(true);
 		backgroundSprite.sprite = defaultBackgroundSprite;
 	}
 
@@ -125,35 +125,38 @@ public class Cell : MonoBehaviour
 		IconManager.Clear();
 	}
 
-	public void OnPlayerEnter(Grid grid, Vector3 enteringFromDirection)
+	public void OnPlayerEnter(Vector3 enteringFromDirection)
 	{
 		if (isTunnel)
-			grid.MovePlayer(GetTunnelExit(grid, enteringFromDirection));
+			GameManager.Instance.grid.MovePlayer(GetTunnelExit(enteringFromDirection));
 		else if (hasMonster)
-			grid.KillPlayer();
+			GameManager.Instance.grid.KillPlayerByMonster();
 		else if (hasTeleporter)
-			grid.TeleportPlayer();
+			GameManager.Instance.grid.TeleportPlayer();
 		else if (hasWell)
-			grid.KillPlayer();
+			GameManager.Instance.grid.KillPlayerByWell();
 	}
 
-	public void OnArrowEnter(Grid grid, Arrow arrow)
+	public void OnArrowEnter(Arrow arrow)
 	{
 		arrow.ApplyMovement();
 		if (hasMonster)
-			grid.PlayerWin();
+			GameManager.Instance.grid.PlayerWin();
 		else if (isTunnel)
 		{
-			arrow.direction = GetTunnelExit(grid, arrow.direction * -1);
-			grid.UpdateArrowMove(arrow);
+			arrow.direction = GetTunnelExit(arrow.direction * -1);
+			GameManager.Instance.grid.UpdateArrowMove(arrow);
 		}
 
-
-		if (grid.GetPlayerCurrentCell() == this)
+		if (GameManager.Instance.grid.GetPlayerCurrentCell() == this)
+		{
 			Debug.Log("YOU KILLED YOURSELF -.-");
+			GameManager.Instance.grid.Suicide();
+		}
+
 	}
 
-	public Vector3 GetTunnelExit(Grid grid, Vector3 enteringFromDirection)
+	public Vector3 GetTunnelExit(Vector3 enteringFromDirection)
 	{
 		if (isTunnel)
 			foreach (Vector3 direction in Grid.AdiacentPositions)

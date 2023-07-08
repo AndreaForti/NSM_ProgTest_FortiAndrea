@@ -39,7 +39,6 @@ public class Grid : MonoBehaviour
 
 	public void ResetGame()
 	{
-		GameManager.Instance.loadingMenu.ResetLoading();
 		WorldGen();
 		PlayerSpawn();
 	}
@@ -102,14 +101,26 @@ public class Grid : MonoBehaviour
 		SetPlayerPositionToCell(randomizedCell, Vector3.zero);
 	}
 
-	public void KillPlayer()
+	public void KillPlayerByWell()
 	{
-		Debug.Log("YOU DIED");
+		GameManager.Instance.player.ActiveMovement = false;
+		GameManager.Instance.resultMenu.SetDeathByWell();
+	}
+	public void KillPlayerByMonster()
+	{
+		GameManager.Instance.player.ActiveMovement = false;
+		GameManager.Instance.resultMenu.SetDeathByMonster();
+	}
+	public void Suicide()
+	{
+		GameManager.Instance.player.ActiveMovement = false;
+		GameManager.Instance.resultMenu.SetDeathByplayer();
 	}
 
 	public void PlayerWin()
 	{
-		Debug.Log("YOU WIN");
+		GameManager.Instance.player.ActiveMovement = false;
+		GameManager.Instance.resultMenu.SetWin();
 	}
 
 
@@ -122,7 +133,7 @@ public class Grid : MonoBehaviour
 	{
 		GameManager.Instance.player.transform.position = cell.transform.position;
 		cell.HideFogOfWar();
-		cell.OnPlayerEnter(this, enteringFromDirection);
+		cell.OnPlayerEnter(enteringFromDirection);
 	}
 	#endregion
 
@@ -418,7 +429,7 @@ public class Grid : MonoBehaviour
 		{
 			Cell destinationArrowCell = GetAdiancentCell(currentArrowCell, arrow.direction);
 			if (destinationArrowCell != null)
-				destinationArrowCell.OnArrowEnter(this, arrow);
+				destinationArrowCell.OnArrowEnter(arrow);
 			else
 				arrow.DestroyArrow();
 		}

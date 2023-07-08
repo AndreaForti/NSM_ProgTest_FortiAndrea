@@ -16,7 +16,7 @@ public class LoadingMenu : MonoBehaviour
 
 	private void Awake()
 	{
-		slider = GetComponentInChildren<Slider>();
+		slider = GetComponentInChildren<Slider>(true);
 		container = transform.GetChild(0);
 		ResetLoading();
 	}

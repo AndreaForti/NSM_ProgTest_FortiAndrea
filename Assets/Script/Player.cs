@@ -25,7 +25,7 @@ public class Player : MonoBehaviour
 
 	private void Awake()
 	{
-		gameGamera = GetComponentInChildren<Camera>();
+		gameGamera = GetComponentInChildren<Camera>(true);
 		gameGamera.orthographicSize *= GameManager.Instance.grid.cellSize;
 	}
 
