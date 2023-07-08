@@ -10,7 +10,6 @@ public class LoadingMenu : MonoBehaviour
 	public float loadingPercentage;
 
 	[SerializeField] private TextMeshProUGUI percentageText;
-	[SerializeField] private Player player;
 	private Slider slider;
 	private Transform container;
 
@@ -24,7 +23,7 @@ public class LoadingMenu : MonoBehaviour
 
 	public void ResetLoading()
 	{
-		player.ActiveMovement = false;
+		GameManager.Instance.player.ActiveMovement = false;
 		container.gameObject.SetActive(true);
 		slider.maxValue = 100;
 		slider.minValue = 0;
@@ -46,6 +45,6 @@ public class LoadingMenu : MonoBehaviour
 	{
 		yield return new WaitForSeconds(0.5f);
 		container.gameObject.SetActive(false);
-		player.ActiveMovement = true;
+		GameManager.Instance.player.ActiveMovement = true;
 	}
 }

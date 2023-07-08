@@ -25,9 +25,6 @@ public class Grid : MonoBehaviour
 
 	[Header("References")]
 	[SerializeField] private Cell cellPrefab;
-	[SerializeField] private Player player;
-	[SerializeField] private Camera gameCamera;
-	[SerializeField] private LoadingMenu LoadingMenu;
 
 	private int generationDepth = 0;
 	private Cell[,] cells;
@@ -38,12 +35,11 @@ public class Grid : MonoBehaviour
 	private void Start()
 	{
 		ResetGame();
-		gameCamera.orthographicSize *= cellSize;
 	}
 
 	public void ResetGame()
 	{
-		LoadingMenu.ResetLoading();
+		GameManager.Instance.loadingMenu.ResetLoading();
 		WorldGen();
 		PlayerSpawn();
 	}
@@ -58,7 +54,7 @@ public class Grid : MonoBehaviour
 	{
 		if (CheckValidPlayerMovement(direction))
 		{
-			player.transform.position += direction * cellSize;
+			GameManager.Instance.player.transform.position += direction * cellSize;
 			Cell destinationCell = GetPlayerCurrentCell();
 			SetPlayerPositionToCell(destinationCell, direction * -1);
 		}
@@ -66,7 +62,7 @@ public class Grid : MonoBehaviour
 
 	public bool CheckValidPlayerMovement(Vector3 direction)
 	{
-		Vector3 testingNewGridCoordinate = GetCellGridCoordinatesFromWorldPos(player.transform.position + direction * cellSize);
+		Vector3 testingNewGridCoordinate = GetCellGridCoordinatesFromWorldPos(GameManager.Instance.player.transform.position + direction * cellSize);
 		if (!IsGridCoordinateInsideGrid(testingNewGridCoordinate))
 			return false;
 
@@ -83,7 +79,7 @@ public class Grid : MonoBehaviour
 	/// <returns></returns>
 	public Cell GetPlayerAdiacentCell(Vector3 relativePosition)
 	{
-		Vector3 cellGridPos = GetCellFromWorldPosition(player.transform.position + relativePosition * cellSize).GetGridPosition();
+		Vector3 cellGridPos = GetCellFromWorldPosition(GameManager.Instance.player.transform.position + relativePosition * cellSize).GetGridPosition();
 
 		if (Mathf.Abs(cellGridPos.x) >= gridSize || Mathf.Abs(cellGridPos.y) >= gridSize)
 			return null;
@@ -124,7 +120,7 @@ public class Grid : MonoBehaviour
 	/// <param name="enteringFromDirection">Direction which the player is entering the new Cell from</param>
 	public void SetPlayerPositionToCell(Cell cell, Vector3 enteringFromDirection)
 	{
-		player.transform.position = cell.transform.position;
+		GameManager.Instance.player.transform.position = cell.transform.position;
 		cell.HideFogOfWar();
 		cell.OnPlayerEnter(this, enteringFromDirection);
 	}
@@ -257,8 +253,8 @@ public class Grid : MonoBehaviour
 	public void PlayerSpawn()
 	{
 		Vector3 cellPosition = GetCellFromGridPosition(spawnPointGrid).transform.position;
-		player.transform.position = cellPosition;
-		player.transform.localScale = new Vector3(cellSize, cellSize, player.transform.localScale.z);
+		GameManager.Instance.player.transform.position = cellPosition;
+		GameManager.Instance.player.transform.localScale = new Vector3(cellSize, cellSize, GameManager.Instance.player.transform.localScale.z);
 		GetPlayerCurrentCell().HideFogOfWar();
 	}
 
@@ -278,7 +274,7 @@ public class Grid : MonoBehaviour
 	{
 		while (cellsStack.Count() > 0)
 		{
-			LoadingMenu.UpdateLoadingPercentage((float)generatedCells * 100 / (gridSize * gridSize));
+			GameManager.Instance.loadingMenu.UpdateLoadingPercentage((float)generatedCells * 100 / (gridSize * gridSize));
 			RunNextCell();
 			yield return new WaitForSeconds(0);
 		}

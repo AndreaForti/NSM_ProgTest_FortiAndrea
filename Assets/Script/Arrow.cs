@@ -9,7 +9,6 @@ using UnityEngine;
 public class Arrow : MonoBehaviour
 {
 	public Vector3 direction;
-	public Grid grid;
 	public SpriteRenderer spriteRenderer;
 
 
@@ -19,7 +18,7 @@ public class Arrow : MonoBehaviour
 	}
 	private void Start()
 	{
-		spriteRenderer.transform.localScale *= grid.cellSize;
+		spriteRenderer.transform.localScale *= GameManager.Instance.grid.cellSize;
 		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, new Vector3(direction.x, direction.y), Vector3.forward));
 		StartPositinUpdateCoroutine();
 	}
@@ -34,19 +33,19 @@ public class Arrow : MonoBehaviour
 		while (true)
 		{
 			yield return new WaitForSeconds(1);
-			grid.UpdateArrowMove(this);
+			GameManager.Instance.grid.UpdateArrowMove(this);
 		}
 	}
 
 	public void ApplyMovement()
 	{
-		transform.position += new Vector3(direction.x, direction.y) * grid.cellSize;
+		transform.position += new Vector3(direction.x, direction.y) * GameManager.Instance.grid.cellSize;
 		spriteRenderer.transform.localRotation = Quaternion.Euler(0, 0, Vector3.SignedAngle(Vector3.right, new Vector3(direction.x, direction.y), Vector3.forward));
 	}
 
 	public void DestroyArrow()
 	{
-		grid.RepositionMonster();
+		GameManager.Instance.grid.RepositionMonster();
 		StopAllCoroutines();
 		Destroy(gameObject);
 	}

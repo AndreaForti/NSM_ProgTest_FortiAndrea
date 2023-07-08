@@ -9,19 +9,6 @@ public class MenuFunctions : MonoBehaviour
 	[SerializeField] private TextMeshProUGUI loading;
 	public void Play()
 	{
-		loading.gameObject.SetActive(true);
-		StartLoadGameScene();
-	}
-
-	void StartLoadGameScene()
-	{
-		StartCoroutine(LoadGameSceneAsync());
-	}
-
-	IEnumerator LoadGameSceneAsync()
-	{
-		AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("WorldGen2", LoadSceneMode.Single);
-		yield return asyncLoad.isDone;
-		SceneManager.SetActiveScene(SceneManager.GetSceneByName("WorldGen2"));
+		SceneManager.LoadScene("WorldGen2", LoadSceneMode.Single);
 	}
 }
