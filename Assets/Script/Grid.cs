@@ -309,8 +309,8 @@ public class Grid : MonoBehaviour
 		{
 			selectedRandomUngeneratedAdiancentCell = ungeneratedAdiacentCells[Random.Range(0, ungeneratedAdiacentCells.Count)];
 			Vector3 direction = GetRelativePositionBetweenCells(selectedRandomUngeneratedAdiancentCell, lastGeneratedCell);
-			selectedRandomUngeneratedAdiancentCell.OpenPath(direction, 1);
-			lastGeneratedCell.OpenPath(direction * -1, 1);
+			selectedRandomUngeneratedAdiancentCell.OpenPath(direction);
+			lastGeneratedCell.OpenPath(direction * -1);
 			Debug.Log($"[{generationDepth}] Opened new Path between cells {lastGeneratedCell.GetGridPosition()} | {selectedRandomUngeneratedAdiancentCell.GetGridPosition()}");
 
 			selectedRandomUngeneratedAdiancentCell.generated = true;
@@ -321,8 +321,8 @@ public class Grid : MonoBehaviour
 			{
 				Cell selectedRandomExtraAdiancentCell = adiacentCells[Random.Range(0, adiacentCells.Count)];
 				Vector3 direction2 = GetRelativePositionBetweenCells(selectedRandomExtraAdiancentCell, lastGeneratedCell);
-				selectedRandomExtraAdiancentCell.OpenPath(direction2, 1);
-				lastGeneratedCell.OpenPath(direction2 * -1, 1);
+				selectedRandomExtraAdiancentCell.OpenPath(direction2);
+				lastGeneratedCell.OpenPath(direction2 * -1);
 			}
 		}
 
