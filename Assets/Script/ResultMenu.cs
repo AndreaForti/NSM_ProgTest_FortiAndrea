@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using static Player;
 
 public class ResultMenu : MonoBehaviour
 {
@@ -29,41 +30,29 @@ public class ResultMenu : MonoBehaviour
 		container = transform.GetChild(0);
 		Clear();
 	}
-	private void SetDefaultDeath()
+
+	public void EnableResultMenu(ResultType resultType)
 	{
 		container.gameObject.SetActive(true);
 		MainText.text = MainTextDeathString;
 		MainText.color = Color.red;
-	}
-	private void SetDefaultWin()
-	{
-		container.gameObject.SetActive(true);
-		MainText.text = MainTextWinString;
-		MainText.color = Color.green;
-	}
-	public void SetDeathByMonster()
-	{
-		SetDefaultDeath();
-		DescriptionText.text = DescriptionTextMonsterString;
-	}
-	public void SetDeathByWell()
-	{
-		SetDefaultDeath();
-		DescriptionText.text = DescriptionTextWellString;
-	}
-	public void SetDeathByplayer()
-	{
-		SetDefaultDeath();
-		DescriptionText.text = DescriptionTextPlayerString;
-	}
-	public void SetWin()
-	{
-		SetDefaultWin();
-		DescriptionText.text = DescriptionTextPlayerWinString;
-	}
 
-	public void NewGame()
-	{
-		GameManager.Instance.RestartGame();
+		switch (resultType)
+		{
+			case ResultType.DeathByMonster:
+				DescriptionText.text = DescriptionTextMonsterString;
+				break;
+			case ResultType.DeathByWell:
+				DescriptionText.text = DescriptionTextWellString;
+				break;
+			case ResultType.DeathByplayer:
+				DescriptionText.text = DescriptionTextPlayerString;
+				break;
+			case ResultType.Win:
+				DescriptionText.text = DescriptionTextPlayerWinString;
+				MainText.text = MainTextWinString;
+				MainText.color = Color.green;
+				break;
+		}
 	}
 }

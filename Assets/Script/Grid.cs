@@ -101,29 +101,6 @@ public class Grid : MonoBehaviour
 		SetPlayerPositionToCell(randomizedCell, Vector3.zero);
 	}
 
-	public void KillPlayerByWell()
-	{
-		GameManager.Instance.player.ActiveMovement = false;
-		GameManager.Instance.resultMenu.SetDeathByWell();
-	}
-	public void KillPlayerByMonster()
-	{
-		GameManager.Instance.player.ActiveMovement = false;
-		GameManager.Instance.resultMenu.SetDeathByMonster();
-	}
-	public void Suicide()
-	{
-		GameManager.Instance.player.ActiveMovement = false;
-		GameManager.Instance.resultMenu.SetDeathByplayer();
-	}
-
-	public void PlayerWin()
-	{
-		GameManager.Instance.player.ActiveMovement = false;
-		GameManager.Instance.resultMenu.SetWin();
-	}
-
-
 	/// <summary>
 	/// Set the Player position to a specific Cell
 	/// </summary>

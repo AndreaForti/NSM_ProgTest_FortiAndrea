@@ -55,4 +55,18 @@ public class Player : MonoBehaviour
 		if (Input.GetKeyDown(KeyCode.L))
 			Shoot(Vector3.right);
 	}
+
+	public void EndPlayerGame(ResultType resultType)
+	{
+		ActiveMovement = false;
+		GameManager.Instance.resultMenu.EnableResultMenu(resultType);
+	}
+
+	public enum ResultType
+	{
+		DeathByMonster,
+		DeathByWell,
+		DeathByplayer,
+		Win
+	}
 }

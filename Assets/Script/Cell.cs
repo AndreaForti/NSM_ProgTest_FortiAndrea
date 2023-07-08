@@ -130,18 +130,18 @@ public class Cell : MonoBehaviour
 		if (isTunnel)
 			GameManager.Instance.grid.MovePlayer(GetTunnelExit(enteringFromDirection));
 		else if (hasMonster)
-			GameManager.Instance.grid.KillPlayerByMonster();
+			GameManager.Instance.player.EndPlayerGame(Player.ResultType.DeathByMonster);
 		else if (hasTeleporter)
 			GameManager.Instance.grid.TeleportPlayer();
 		else if (hasWell)
-			GameManager.Instance.grid.KillPlayerByWell();
+			GameManager.Instance.player.EndPlayerGame(Player.ResultType.DeathByWell);
 	}
 
 	public void OnArrowEnter(Arrow arrow)
 	{
 		arrow.ApplyMovement();
 		if (hasMonster)
-			GameManager.Instance.grid.PlayerWin();
+			GameManager.Instance.player.EndPlayerGame(Player.ResultType.Win);
 		else if (isTunnel)
 		{
 			arrow.direction = GetTunnelExit(arrow.direction * -1);
@@ -149,10 +149,7 @@ public class Cell : MonoBehaviour
 		}
 
 		if (GameManager.Instance.grid.GetPlayerCurrentCell() == this)
-		{
-			Debug.Log("YOU KILLED YOURSELF -.-");
-			GameManager.Instance.grid.Suicide();
-		}
+			GameManager.Instance.player.EndPlayerGame(Player.ResultType.DeathByplayer);
 
 	}
 
