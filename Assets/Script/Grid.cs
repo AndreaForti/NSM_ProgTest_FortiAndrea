@@ -53,6 +53,7 @@ public class Grid : MonoBehaviour
 	{
 		if (CheckValidPlayerMovement(direction))
 		{
+			GameManager.Instance.player.transform.position += direction * cellSize;
 			Cell destinationCell = GetPlayerCurrentCell();
 			SetPlayerPositionToCell(destinationCell, direction * -1);
 		}
@@ -383,7 +384,7 @@ public class Grid : MonoBehaviour
 		cellList.ForEach(x => x.ClearEntyty());
 		foreach (Cell cell in cellList.Where(x => x.hasMonster).ToList())
 		{
-			cell.SetEntityGUI(new Color(242,51,52));
+			cell.SetEntityGUI(new Color32(255, 50, 50, 255));
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Monster);
@@ -391,7 +392,7 @@ public class Grid : MonoBehaviour
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasTeleporter).ToList())
 		{
-			cell.SetEntityGUI(new Color(52, 121, 242));
+			cell.SetEntityGUI(new Color32(50, 130, 255, 255));
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Telporter);
@@ -399,7 +400,7 @@ public class Grid : MonoBehaviour
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasWell).ToList())
 		{
-			cell.SetEntityGUI(new Color(63, 154, 33));
+			cell.SetEntityGUI(new Color32(65, 150, 25, 255));
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Well);

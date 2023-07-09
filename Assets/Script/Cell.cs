@@ -26,10 +26,10 @@ public class Cell : MonoBehaviour
 
 	private Vector3 gridPosition;
 	private int[] paths = new int[4] { 0, 0, 0, 0 };
-	public bool CanMonsterSpawn() { return !hasMonster && !hasTeleporter && !hasWell && !canThreatsSpawn && isHidden; }
-	public bool CanTeleporterSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
-	public bool CanWellSpawn() { return !(hasMonster || hasTeleporter || hasWell) && !canThreatsSpawn; }
-	public bool IsCellSafeFromThreats() { return !(hasMonster || hasTeleporter || hasWell); }
+	public bool CanMonsterSpawn() { return !hasMonster && !hasTeleporter && !hasWell && !canThreatsSpawn && isHidden && !isTunnel; }
+	public bool CanTeleporterSpawn() { return !hasMonster && !hasTeleporter && !hasWell && !canThreatsSpawn; }
+	public bool CanWellSpawn() { return !hasMonster && !hasTeleporter && !hasWell && !canThreatsSpawn; }
+	public bool IsCellSafeFromThreats() { return !hasMonster && !hasTeleporter && !hasWell; }
 
 	public bool CanTunnelSpawn()
 	{
