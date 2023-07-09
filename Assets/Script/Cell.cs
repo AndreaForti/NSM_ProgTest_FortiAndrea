@@ -167,6 +167,7 @@ public class Cell : MonoBehaviour
 		isTunnel = true;
 		backgroundSprite.sprite = tunnelBackgroundSprite;
 
+		//Calculate Direction for sprite rotation
 		for (int i = 0; i < paths.Length; i++)
 		{
 			if (paths[i] == 1 && i == paths.Length - 1)

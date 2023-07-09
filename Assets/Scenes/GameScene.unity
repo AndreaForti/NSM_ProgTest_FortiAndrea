@@ -507,6 +507,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1520743974}
     m_Modifications:
+    - target: {fileID: 1793366926, guid: 0adc257fbfdad764fbd42c9e9c1d3a04, type: 3}
+      propertyPath: orthographic size
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 5396585256441278261, guid: 0adc257fbfdad764fbd42c9e9c1d3a04, type: 3}
       propertyPath: m_Name
       value: Player
@@ -611,22 +615,6 @@ PrefabInstance:
     - target: {fileID: 3559080903268120913, guid: 6d6c18cbdd8dfac47a7947dc69eb4287, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3559080903670405877, guid: 6d6c18cbdd8dfac47a7947dc69eb4287, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value: 
-      objectReference: {fileID: 922592866}
-    - target: {fileID: 3559080903670405877, guid: 6d6c18cbdd8dfac47a7947dc69eb4287, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: NewGame
-      objectReference: {fileID: 0}
-    - target: {fileID: 3559080903670405877, guid: 6d6c18cbdd8dfac47a7947dc69eb4287, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: ResultMenu, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 3559080903670405877, guid: 6d6c18cbdd8dfac47a7947dc69eb4287, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
-      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 3559080903932094388, guid: 6d6c18cbdd8dfac47a7947dc69eb4287, type: 3}
       propertyPath: m_AnchorMax.y
@@ -773,6 +761,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1344206153}
     m_Modifications:
+    - target: {fileID: 8435423990094414186, guid: 6415eac196b7ffd4e8feaa2ce6cdf063, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8435423990094414186, guid: 6415eac196b7ffd4e8feaa2ce6cdf063, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8435423991279220997, guid: 6415eac196b7ffd4e8feaa2ce6cdf063, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

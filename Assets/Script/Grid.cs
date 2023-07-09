@@ -53,7 +53,6 @@ public class Grid : MonoBehaviour
 	{
 		if (CheckValidPlayerMovement(direction))
 		{
-			GameManager.Instance.player.transform.position += direction * cellSize;
 			Cell destinationCell = GetPlayerCurrentCell();
 			SetPlayerPositionToCell(destinationCell, direction * -1);
 		}
@@ -250,7 +249,7 @@ public class Grid : MonoBehaviour
 		GetPlayerCurrentCell().HideFogOfWar();
 	}
 
-	
+
 
 	public void RunWorldGenerationCoroutine()
 	{
@@ -327,38 +326,55 @@ public class Grid : MonoBehaviour
 
 	private void MonsterSpawn()
 	{
+		List<Cell> cellPullList = cellList.Where(x => x.CanMonsterSpawn()).ToList();
 		for (int i = 0; i < monsterSpawnCount; i++)
 		{
-			Cell randomizedCell = cellList.Where(x => x.CanMonsterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanMonsterSpawn()).Count())];
+			if (cellPullList.Count == 0)
+				break;
+			Cell randomizedCell = cellPullList[Random.Range(0, cellPullList.Count())];
 			randomizedCell.hasMonster = true;
+			cellPullList.Remove(randomizedCell);
 		}
 	}
 
 	private void TeleporterSpawn()
 	{
+		List<Cell> cellPullList = cellList.Where(x => x.CanTeleporterSpawn()).ToList();
+
 		for (int i = 0; i < teleporterSpawnCount; i++)
 		{
-			Cell randomizedCell = cellList.Where(x => x.CanTeleporterSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanTeleporterSpawn()).Count())];
+			if (cellPullList.Count == 0)
+				break;
+			Cell randomizedCell = cellPullList[Random.Range(0, cellPullList.Count())];
 			randomizedCell.hasTeleporter = true;
+			cellPullList.Remove(randomizedCell);
 		}
 	}
 	private void WellSpawn()
 	{
+		List<Cell> cellPullList = cellList.Where(x => x.CanWellSpawn()).ToList();
+
 		for (int i = 0; i < wellSpawnCount; i++)
 		{
-			Cell randomizedCell = cellList.Where(x => x.CanWellSpawn()).ToList()[Random.Range(0, cellList.Where(x => x.CanWellSpawn()).Count())];
+			if (cellPullList.Count == 0)
+				break;
+			Cell randomizedCell = cellPullList[Random.Range(0, cellPullList.Count())];
 			randomizedCell.hasWell = true;
+			cellPullList.Remove(randomizedCell);
 		}
 	}
 
 	private void TunnelSpawn()
 	{
-		List<Cell> availableCells = cellList.Where(x => x.CanTunnelSpawn()).ToList();
+		List<Cell> cellPullList = cellList.Where(x => x.CanTunnelSpawn()).ToList();
 		//Debug.Log($"AvailableCells for Tunnel Spawn: {availableCells.Count()}");
 		for (int i = 0; i < tunnelSpawnCount; i++)
 		{
-			Cell selectedCell = availableCells[Random.Range(0, availableCells.Where(x => x.CanTunnelSpawn()).Count())];
+			if (cellPullList.Count == 0)
+				break;
+			Cell selectedCell = cellPullList[Random.Range(0, cellPullList.Count())];
 			selectedCell.SetTunnelCell();
+			cellPullList.Remove(selectedCell);
 		}
 	}
 
@@ -367,7 +383,7 @@ public class Grid : MonoBehaviour
 		cellList.ForEach(x => x.ClearEntyty());
 		foreach (Cell cell in cellList.Where(x => x.hasMonster).ToList())
 		{
-			cell.SetEntityGUI(Color.red);
+			cell.SetEntityGUI(new Color(242,51,52));
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Monster);
@@ -375,7 +391,7 @@ public class Grid : MonoBehaviour
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasTeleporter).ToList())
 		{
-			cell.SetEntityGUI(Color.cyan);
+			cell.SetEntityGUI(new Color(52, 121, 242));
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Telporter);
@@ -383,7 +399,7 @@ public class Grid : MonoBehaviour
 		}
 		foreach (Cell cell in cellList.Where(x => x.hasWell).ToList())
 		{
-			cell.SetEntityGUI(Color.green);
+			cell.SetEntityGUI(new Color(63, 154, 33));
 			foreach (Cell adiacentCell in GetAdiacentCells(cell))
 			{
 				adiacentCell.IconManager.AddIcon(IconType.Well);
